@@ -1,21 +1,41 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
+import { Webhooks } from '@octokit/webhooks'
+const webhooks = new Webhooks({
+    secret: process.env.GitHubWebhookSecret,
+});
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     context.log('HTTP trigger function processed a request.');
-    const name = (req.query.name || (req.body && req.body.name));
+    context.log(`Event type: ${ req.headers['X-GitHub-Event'] }`)
 
-    if (name) {
-        context.res = {
-            // status: 200, /* Defaults to 200 */
-            body: "Hello " + (req.query.name || req.body.name)
-        };
-    }
-    else {
-        context.res = {
-            status: 400,
-            body: "Please pass a name on the query string or in the request body"
-        };
-    }
+    webhooks.on('check_run.completed', evt => {
+        context.log('check_run.completed');
+        context.log(JSON.stringify(evt))
+    })
+
+    webhooks.on('pull_request.synchronize', evt => {
+        context.log('pull_request.synchronize');
+        context.log(JSON.stringify(evt))
+    })
+
+    webhooks.on('check_suite.completed', evt => {
+        context.log('check_suite.completed');
+        context.log(JSON.stringify(evt))
+        const pullRequests = evt.payload.check_suite.pull_requests
+    })
+
+    // parse pull request event
+    webhooks.on("pull_request.opened", (evt) => {
+        context.log('pull_request.opened')
+        context.log(JSON.stringify(evt))
+    })
+
+    await webhooks.verifyAndReceive({
+        id: context.req.headers['X-GitHub-Delivery'],
+        name: context.req.headers['X-GitHub-Event'],
+        payload: context.req.body,
+        signature: context.req.headers['HTTP_X_HUB_SIGNATURE'],
+    });
 };
 
 export default httpTrigger;
