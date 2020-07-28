@@ -6,7 +6,7 @@ const webhooks = new Webhooks({
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     context.log('HTTP trigger function processed a request.');
-    context.log(`Event type: ${ req.headers['X-GitHub-Event'] }`)
+    context.log(`Event type: ${ req.headers['x-github-event'] }`)
 
     webhooks.on('check_run.completed', evt => {
         context.log('check_run.completed');
@@ -31,10 +31,10 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     })
 
     await webhooks.verifyAndReceive({
-        id: context.req.headers['X-GitHub-Delivery'],
-        name: context.req.headers['X-GitHub-Event'],
+        id: context.req.headers['x-github-delivery'],
+        name: context.req.headers['x-github-event'],
         payload: context.req.body,
-        signature: context.req.headers['HTTP_X_HUB_SIGNATURE'],
+        signature: context.req.headers['x-hub-signature'],
     });
 };
 
