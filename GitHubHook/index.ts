@@ -8,8 +8,8 @@ import { Webhooks } from '@octokit/webhooks'
 function getOctokit(installationId?: number) {
     return new Octokit({
         auth: {
-            id: process.env.GitHubAppId ?? 74711,
-            privateKey: process.env.GitHubAppPrivateKey ?? "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA0LBhg0U3z+4ikz9J1ycALEpPfLHz3iiEswQWInx+jT8jUQHK\nCY8CU29G16JWRpDw5OLLTvaWAN9vCOXx9AH4YVLzSFn9LunS3bzQP1JFngdl62Mr\nT+XvzEtFapDU44W56bjUVnGDpMGrVDuifrSumEHn15D5bTPOZuiemGlgrvxW/BF1\ncKd98WUiLn0k8EKblimpHQalpLZS3JCBfgmqw2JjLA9IK+3ADnXc5WSWXUuiKj6U\nDtcGmWjZ1bEWRz8cOcc1B2DdkhMsF5bra8Ma3koYAg6HE30fWMnwx+4Wl1co2zoe\nnbonRkfoY9ycxSNx1ruW/I9Bqw4NhtHMNkB1AwIDAQABAoIBAQCvvbmAqIvFyQ7I\n3aU7UJauta2Wnu11ir2lW62gQSL5o9AD6fPQdORKiw0njogFSQ30UqFP0Aymk4KY\nBbzp9bbLjuVdapryJOr03IqqqIgD+srznUHeOQ7mBgVhJrKBIB5eGs6GNXXdC1NS\nzh2bgmD9y5KIUIgcVGJe+0qDo0pOUKDPstbXPgggAr6ws9jw0e0N3OUP+JOKFR5c\nGGCv3Ovu74+zFFonEqE11jhdemNzJwvcjYnOA3qNpwRH3IYyXOxCiJ9yH79h2BZ4\no8TI4433NKlEclj1yCo8v8TeY46T9M/OgJbVF0ml3w//Zb8NsHtjHqFHNhtQGxP5\nV7fhgiNxAoGBAPL7o22cnb8kp9MwpYru/Wj38/Tw/VQXbYY8t8GIk2eV7K10OYBi\ndUmJ4LLQtUNRtRIiJvuKOeqlz7AJW09JC/GM79EwHlMbELEAJNBm44eSO1JI/59p\nl8PdVMJSB4OOYillw9bcltg8LmOO2U0NFTyd20JvDCrMUHWO9/8L18iPAoGBANve\na/pUbaS4x9Dya27Tlgw4p3uA+orhhrGV4TT1tHmnLUywkieCm99DSMH5qEdgeuTO\nnUkbzhR/MSPdt21dA+zT4ASLKgFhQepwyFQ8nhWzcot1Oezi0ux8yymzYK7/jYz5\nWhcnS9FzZA0edeF7hAMXQ/bA2qTFT3cpn6DyEb5NAoGACZ0dNTwKHcL0hO2azylv\ni1SsKVfTnh0jLzl9x8GAm4uaBq7fi43ZuCQlaM3LLjOwZ1xEkJVCf186HWvxWey4\n9UCvSGaP/JfIjEhGLJy1ieqmQDY1Lvh9kblTHjEirPjYN20YV4r4yOtwpm3DeUH4\nQiK4xyMfpx3YXR5f/45XZk8CgYB4wkn1/McXsLF2jp75CNchsUAzshxpiQKsqNA/\ngS/1nR9hPp2Xe8HWtyLP/yowwcndv6ldjRr74PwBYfYr5+mO+rPQawrQJTXJ6NXu\nhjihXKTt+Z2uAMquPsBrD+1rUErTgeS8UMXwrPrnxbIi/O79r5qRfUzZMNG7di4J\nfMrIBQKBgDYKAQn1LWU7houLv4KEuqD18h09pAV08P/t80wB4zfQdE06LI2YQB+d\noqMqxSDrwai+fKYmG0zTsiFHlQ9AGlS2VutrlDGBpmlLyyJFyNaEQDqMk5Nwe34l\ns8hw+gzL81XeHUBi8ZdBu2EDsM3Wo477NkGYgIVhBj4zJO2L9Pkr\n-----END RSA PRIVATE KEY-----\n",
+            id: process.env.GitHubAppId,
+            privateKey: process.env.GitHubAppPrivateKey.replace('\\n', '\n'), // we use "\n" literals as placeholders for line endings in the Azure Properties
             installationId,
         },
         authStrategy: createAppAuth,
@@ -17,7 +17,7 @@ function getOctokit(installationId?: number) {
 }
 
 const webhooks = new Webhooks({
-    secret: process.env.GitHubWebhookSecret ?? "3@4#U8**ku#MXPe6",
+    secret: process.env.GitHubWebhookSecret,
 });
 
 const constants = {
