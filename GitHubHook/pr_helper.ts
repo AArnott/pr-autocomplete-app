@@ -11,10 +11,6 @@ export class PullRequest {
 	}
 
 	async get(): Promise<PullsGetResponseData | undefined> {
-		if (!this.number) {
-			return undefined
-		}
-
 		const response = await this.octokit.pulls.get({
 			owner: this.owner,
 			repo: this.repo,
@@ -24,19 +20,24 @@ export class PullRequest {
 		return response.data
 	}
 
-	async merge(
-		mergeMethod: 'merge' | 'squash' | 'rebase' | undefined
-	): Promise<boolean> {
-		if (!this.number) {
-			return false
-		}
-
+	async merge(mergeMethod: 'merge' | 'squash' | 'rebase' | undefined): Promise<boolean> {
 		const response = await this.octokit.pulls.merge({
 			owner: this.owner,
 			repo: this.repo,
 			pull_number: this.number,
 			merge_method: mergeMethod,
 		})
+		return response.status === 200
+	}
+
+	async removeLabel(name:string): Promise<boolean> {
+		const response = await this.octokit.issues.removeLabel({
+			owner: this.owner,
+			repo: this.repo,
+			issue_number: this.number,
+			name: name,
+		})
+		
 		return response.status === 200
 	}
 }

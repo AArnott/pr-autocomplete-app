@@ -24,8 +24,7 @@ const constants = {
     autoMergeLabel: 'auto-merge',
     autoSquashLabel: 'auto-squash',
     ready_states: ['clean', 'has_hooks'],
-    write_permission: 'write',
-    admin_permission: 'admin'
+    required_permissions: ['write', 'admin'],
 }
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
@@ -51,6 +50,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
                 evt.payload.repository.owner.login,
                 evt.payload.sender.login,
                 getOctokit((evt.payload as any).installation.id))
+
             await processPullRequest(pullRequest, getOctokit((evt.payload as any).installation.id), context)
         } catch (err) {
             context.log('Error occurred: ' + err);
@@ -70,6 +70,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
                 evt.payload.repository.owner.login,
                 evt.payload.sender.login,
                 getOctokit((evt.payload as any).installation.id))
+
             await processPullRequest(pullRequest, getOctokit(evt.payload.installation.id), context)
         }
     })
@@ -124,29 +125,18 @@ async function processPullRequest(pullRequest: PullRequest, octokit: Octokit, co
     let userPermission = response.data.permission // Permission level of actual user
 
     // if the user does not have write access we must remove the label
-    if (constants.write_permission != userPermission && constants.admin_permission != userPermission) {
+    if (!constants.required_permissions.includes(userPermission)) {
         context.log(`User ${username} does not have permission. Permission: ${userPermission}`)
 
         if (hasAutoMergeLabel) {
             context.log(`User ${username} removing automerge label: ${userPermission}`)
-            await octokit.issues.removeLabel({
-                owner: pullRequest.owner,
-                repo: pullRequest.repo,
-                issue_number: pullRequest.number,
-                name: constants.autoMergeLabel,
-            })
+            await pullRequest.removeLabel(constants.autoMergeLabel)
         }
         if (hasAutoSquashLabel) {
-            context.log(
-                `User ${username} removing autosquash label: ${userPermission}`
-            )
-            await octokit.issues.removeLabel({
-                owner: pullRequest.owner,
-                repo: pullRequest.repo,
-                issue_number: pullRequest.number,
-                name: constants.autoSquashLabel,
-            })
+            context.log(`User ${username} removing autosquash label: ${userPermission}`)
+            await pullRequest.removeLabel(constants.autoSquashLabel)
         }
+        
         // abort the process because they don't have write/admin permission and cannot make changes
         // once the labels have been assigned
         return
