@@ -1,4 +1,4 @@
-import { PullRequest } from './pr_helper'
+import { PullRequest, MergeMethods } from './pr_helper'
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 import { Octokit } from '@octokit/rest'
 import { createAppAuth } from '@octokit/auth-app'
@@ -21,10 +21,15 @@ function getOctokit(installationId?: number) {
 }
 
 const constants = {
-    autoMergeLabel: 'auto-merge',
-    autoSquashLabel: 'auto-squash',
+    labelMap : new Map([
+        ["auto-merge", "merge"],
+        ["auto-squash", "squash"],
+        ["auto-rebase", "rebase"]
+    ]),
     ready_states: ['clean', 'has_hooks'],
     required_permissions: ['write', 'admin'],
+    request_changes: 'CHANGES_REQUESTED',
+    comment: 'COMMENTED'
 }
 
 let eventCounter = 0
@@ -96,23 +101,22 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
     // Get the pr data
     const pullRequestData = await pullRequest.get()
 
-    // Find the labels that indicates the auto completion
-    const hasAutoMergeLabel = pullRequestData?.labels.find(
-        label => label.name === constants.autoMergeLabel
-    )
-    const hasAutoSquashLabel = pullRequestData?.labels.find(
-        label => label.name === constants.autoSquashLabel
-    )
+    // if multiple labels we return because of ambiguous state
+    let labelCount = 0
+    let autoCompleteMethod: MergeMethods
 
-    // Check for valid labels
-    if (hasAutoMergeLabel && hasAutoSquashLabel) {
-        // Do nothing, since we're in an ambiguous state with multiple labels defined.
+    constants.labelMap.forEach((labelValue: string, labelKey: string) => {
+        if (pullRequestData?.labels.find(
+            label => label.name === labelKey
+        )) {
+            labelCount ++
+            autoCompleteMethod = autoCompleteMethod[labelValue]
+        }
+    })
+
+    if (labelCount != 1) {
         return
     }
-
-    const autoCompleteMethod = hasAutoMergeLabel ? 'merge'
-        : hasAutoSquashLabel ? 'squash'
-            : undefined
 
     if (autoCompleteMethod) {
         context.log(`pullRequestData: ${JSON.stringify(pullRequestData)}`)
@@ -132,7 +136,7 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
         for (const review of reviews) {
             // Don't consider comment-only to be a vote one way or another,
             // to be consistent with GitHub UI.
-            if (review.state !== 'COMMENTED') {
+            if (review.state !== constants.comment) {
                 lastReviewVote[review.user.login] = review.state;
             }
         }
@@ -140,7 +144,7 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
         for (const voter in lastReviewVote) {
             if (Object.prototype.hasOwnProperty.call(lastReviewVote, voter)) {
                 const vote: string = lastReviewVote[voter];
-                if (vote === 'CHANGES_REQUESTED') {
+                if (vote === constants.request_changes) {
                     context.log(`Changes requested by ${voter}. Not merging.`);
                     return;
                 }
@@ -176,29 +180,17 @@ async function isInvalidatingUser(pullRequest: PullRequest, octokit: Octokit, co
     // if the user does not have write access we must remove the label
     if (!constants.required_permissions.includes(userPermission)) {
         context.log(`User ${username} does not have permission. Permission: ${userPermission}`)
-
-        const hasAutoMergeLabel = pullRequestData?.labels.find(
-            label => label.name === constants.autoMergeLabel
-        )
-        const hasAutoSquashLabel = pullRequestData?.labels.find(
-            label => label.name === constants.autoSquashLabel
-        )
-
-        if (hasAutoMergeLabel) {
-            context.log(`Removing auto-merge label`)
-            await pullRequest.removeLabel(constants.autoMergeLabel)
-            context.log(`Removed auto-merge label`)
+        
+        const labels = pullRequestData?.labels.filter(label => constants.labelMap.has(label.name))
+        for (const label of labels) {
+            context.log(`Removing ${label.name} label`)
+            await pullRequest.removeLabel(label.name)
+            context.log(`Remove ${label.name} label`)
         }
-        if (hasAutoSquashLabel) {
-            context.log(`Removing auto-squash label`)
-            await pullRequest.removeLabel(constants.autoSquashLabel)
-            context.log(`Removed auto-squash label`)
-        }
-
         return true // invalid user
     }
 
     return false
 }
 
-export default httpTrigger;
+export default httpTrigger

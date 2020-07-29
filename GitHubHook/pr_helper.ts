@@ -13,6 +13,12 @@ type PRInfo = {
 	sender: Webhooks.WebhookPayloadPullRequestSender;
 }
 
+export enum MergeMethods {
+	merge = 'merge',
+	squash = 'squash',
+	rebase = 'rebase'
+}
+
 export class PullRequest {
 	private data?: PullsGetResponseData;
 
@@ -46,13 +52,14 @@ export class PullRequest {
 		return response.data
 	}
 
-	async merge(mergeMethod: 'merge' | 'squash' | 'rebase' | undefined): Promise<boolean> {
+	async merge(mergeMethod:MergeMethods): Promise<boolean> {
 		const response = await this.octokit.pulls.merge({
 			owner: this.pull_request.repository.owner.login,
 			repo: this.pull_request.repository.name,
 			pull_number: this.pullRequestNumber,
 			merge_method: mergeMethod,
 		})
+
 		return response.status === 200
 	}
 
