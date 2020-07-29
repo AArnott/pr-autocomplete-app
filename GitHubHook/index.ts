@@ -130,7 +130,11 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
         context.log("Reviews: " + JSON.stringify(reviews))
         const lastReviewVote = new Map<string, string>();
         for (const review of reviews) {
-            lastReviewVote[review.user.login] = review.state;
+            // Don't consider comment-only to be a vote one way or another,
+            // to be consistent with GitHub UI.
+            if (review.state !== 'COMMENTED') {
+                lastReviewVote[review.user.login] = review.state;
+            }
         }
 
         for (const voter in lastReviewVote) {
