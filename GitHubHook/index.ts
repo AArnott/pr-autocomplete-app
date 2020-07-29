@@ -56,6 +56,19 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         }
     })
 
+    webhooks.on('pull_request_review', async evt => {
+        try {
+            context.log(`${context.req.headers['x-github-event']}.${evt.payload.action}: ${++eventCounter}`)
+            const octokit = getOctokit((evt.payload as any).installation.id)
+            const pullRequest = new PullRequest(evt.payload.pull_request.number, evt.payload, octokit)
+
+            await processPullRequest(pullRequest, context)
+        } catch (err) {
+            context.log(err);
+            throw err;
+        }
+    });
+
     webhooks.on('check_suite.completed', async evt => {
         try {
             context.log(`${context.req.headers['x-github-event']}.${evt.payload.action}: ${++eventCounter}`)
