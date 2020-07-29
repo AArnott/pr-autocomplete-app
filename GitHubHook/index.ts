@@ -1,15 +1,19 @@
-
 import { PullRequest } from './pr_helper'
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 import { Octokit } from '@octokit/rest'
 import { createAppAuth } from '@octokit/auth-app'
 import { Webhooks } from '@octokit/webhooks'
+import Inputs from './inputs'
+
+console.log(`Has GitHubAppId: ${Inputs.GitHubAppId}`);
+console.log(`Has GitHubAppPrivateKey?: ${!!Inputs.GitHubAppPrivateKey}`);
+console.log(`Has GitHubWebhookSecret?: ${!!Inputs.GitHubWebhookSecret}`);
 
 function getOctokit(installationId?: number) {
     return new Octokit({
         auth: {
-            id: process.env.GitHubAppId,
-            privateKey: process.env.GitHubAppPrivateKey.replace('\\n', '\n'), // we use "\n" literals as placeholders for line endings in the Azure Properties
+            id: Inputs.GitHubAppId,
+            privateKey: Inputs.GitHubAppPrivateKey.replace('\\n', '\n'), // we use "\n" literals as placeholders for line endings in the Azure Properties
             installationId,
         },
         authStrategy: createAppAuth,
@@ -17,7 +21,7 @@ function getOctokit(installationId?: number) {
 }
 
 const webhooks = new Webhooks({
-    secret: process.env.GitHubWebhookSecret,
+    secret: Inputs.GitHubWebhookSecret,
 });
 
 const constants = {
@@ -29,9 +33,9 @@ const constants = {
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     context.log('HTTP trigger function processed a request.');
-    context.log(`Has GitHubAppId: ${process.env.GitHubAppId}`);
-    context.log(`Has GitHubAppPrivateKey?: ${!!process.env.GitHubAppPrivateKey}`);
-    context.log(`Has GitHubWebhookSecret?: ${!!process.env.GitHubWebhookSecret}`);
+    context.log(`Has GitHubAppId: ${Inputs.GitHubAppId}`);
+    context.log(`Has GitHubAppPrivateKey?: ${!!Inputs.GitHubAppPrivateKey}`);
+    context.log(`Has GitHubWebhookSecret?: ${!!Inputs.GitHubWebhookSecret}`);
     context.log(`Event type: ${req.headers['x-github-event']}`)
 
     webhooks.on('check_run.completed', evt => {
@@ -136,7 +140,7 @@ async function processPullRequest(pullRequest: PullRequest, octokit: Octokit, co
             context.log(`User ${username} removing autosquash label: ${userPermission}`)
             await pullRequest.removeLabel(constants.autoSquashLabel)
         }
-        
+
         // abort the process because they don't have write/admin permission and cannot make changes
         // once the labels have been assigned
         return
