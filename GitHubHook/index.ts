@@ -20,10 +20,6 @@ function getOctokit(installationId?: number) {
     });
 }
 
-const webhooks = new Webhooks({
-    secret: Inputs.GitHubWebhookSecret,
-});
-
 const constants = {
     autoMergeLabel: 'auto-merge',
     autoSquashLabel: 'auto-squash',
@@ -31,13 +27,19 @@ const constants = {
     required_permissions: ['write', 'admin'],
 }
 
+let eventCounter = 0
+
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     context.log(`Event type: ${req.headers['x-github-event']}`)
     context.log(`Event ID: ${req.headers['x-github-delivery']}`)
 
+    const webhooks = new Webhooks({
+        secret: Inputs.GitHubWebhookSecret,
+    });
+
     webhooks.on('pull_request', async evt => {
         try {
-            context.log(`${context.req.headers['x-github-event']}.${evt.payload.action}`)
+            context.log(`${context.req.headers['x-github-event']}.${evt.payload.action}: ${++eventCounter}`)
             const octokit = getOctokit((evt.payload as any).installation.id)
             const pullRequest = new PullRequest(evt.payload.pull_request.number, evt.payload, octokit)
 
@@ -56,7 +58,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
     webhooks.on('check_suite.completed', async evt => {
         try {
-            context.log(`${context.req.headers['x-github-event']}.${evt.payload.action}`)
+            context.log(`${context.req.headers['x-github-event']}.${evt.payload.action}: ${++eventCounter}`)
             const octokit = getOctokit(evt.payload.installation.id)
 
             for (const pr of evt.payload.check_suite.pull_requests) {
@@ -150,10 +152,12 @@ async function isInvalidatingUser(pullRequest: PullRequest, octokit: Octokit, co
         if (hasAutoMergeLabel) {
             context.log(`Removing auto-merge label`)
             await pullRequest.removeLabel(constants.autoMergeLabel)
+            context.log(`Removed auto-merge label`)
         }
         if (hasAutoSquashLabel) {
             context.log(`Removing auto-squash label`)
             await pullRequest.removeLabel(constants.autoSquashLabel)
+            context.log(`Removed auto-squash label`)
         }
 
         return true // invalid user

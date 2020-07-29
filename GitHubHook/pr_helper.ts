@@ -44,7 +44,7 @@ export class PullRequest {
 			owner: this.pull_request.repository.owner.login,
 			repo: this.pull_request.repository.name,
 			issue_number: this.pullRequestNumber,
-			name: name,
+			name,
 		})
 
 		return response.status === 200
