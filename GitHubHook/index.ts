@@ -1,4 +1,4 @@
-import { PullRequest } from './pr_helper'
+import { PullRequest, MergeMethods } from './pr_helper'
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 import { Octokit } from '@octokit/rest'
 import { createAppAuth } from '@octokit/auth-app'
@@ -21,10 +21,15 @@ function getOctokit(installationId?: number) {
 }
 
 const constants = {
-    labelMap : new Map([
-        ["merge", "auto-merge"],
-        ["squash", "auto-squash"],
-        ["rebase", "auto-rebase"]
+    // labelMap : new Map([
+    //     ["merge", "auto-merge"],
+    //     ["squash", "auto-squash"],
+    //     ["rebase", "auto-rebase"]
+    // ]),
+    reverseLabelMap : new Map([
+        ["auto-merge", "merge"],
+        ["auto-squash", "squash"],
+        ["auto-rebase", "rebase"]
     ]),
     ready_states: ['clean', 'has_hooks'],
     required_permissions: ['write', 'admin'],
@@ -101,34 +106,27 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
     // Get the pr data
     const pullRequestData = await pullRequest.get()
 
-    // // Find the labels that indicates the auto completion
-    // const hasAutoMergeLabel = pullRequestData?.labels.find(
-    //     label => label.name === constants.autoMergeLabel
-    // )
-    // const hasAutoSquashLabel = pullRequestData?.labels.find(
-    //     label => label.name === constants.autoSquashLabel
-    // )
-    // const hasAutoRebaseLabel = pullRequestData?.labels.find(
-    //     label => label.name === constants.autoRebaseLabel
-    // )
-
-    // // Check for valid labels
-    // if (hasAutoMergeLabel && hasAutoSquashLabel) {
-    //     // Do nothing, since we're in an ambiguous state with multiple labels defined.
-    //     return
-    // }
-
     // if multiple labels we return because of ambiguous state
     let labelCount = 0
-    let autoCompleteMethod
-    constants.labelMap.forEach((labelValue: string, labelKey: string) => {
+    let autoCompleteMethod: MergeMethods
+    // constants.labelMap.forEach((labelValue: string, labelKey: string) => {
+    //     if (pullRequestData?.labels.find(
+    //         label => label.name === labelValue
+    //     )) {
+    //         labelCount ++
+    //         autoCompleteMethod = autoCompleteMethod[labelKey]
+    //     }
+    // })
+
+    constants.reverseLabelMap.forEach((labelValue: string, labelKey: string) => {
         if (pullRequestData?.labels.find(
-            label => label.name === labelValue
+            label => label.name === labelKey
         )) {
             labelCount ++
-            autoCompleteMethod = labelKey
+            autoCompleteMethod = autoCompleteMethod[labelValue]
         }
     })
+
     if (labelCount != 1) {
         return
     }
@@ -196,41 +194,23 @@ async function isInvalidatingUser(pullRequest: PullRequest, octokit: Octokit, co
     if (!constants.required_permissions.includes(userPermission)) {
         context.log(`User ${username} does not have permission. Permission: ${userPermission}`)
         
-        //const labels = pullRequestData?.labels.filter(label => constants.labelMap.has(label.name))
-        //for (const label of labels) {
-            // context.log(`Removing ${label} label`)
-            // await pullRequest.removeLabel(label)
-            // context.log(`Remove ${label} label`)
-        // }
+        const labels = pullRequestData?.labels.filter(label => constants.reverseLabelMap.has(label.name))
+        for (const label of labels) {
+            context.log(`Removing ${label.name} label`)
+            await pullRequest.removeLabel(label.name)
+            context.log(`Remove ${label.name} label`)
+        }
 
-        constants.labelMap.forEach((async(labelValue: string, labelKey: string) => {
-            if (pullRequestData?.labels.find(
-                label => label.name === labelValue
-            )) {
-                // remove the label 
-                context.log(`Removing ${labelValue} label`)
-                await pullRequest.removeLabel(labelValue)
-                context.log(`Removed ${labelValue} label`)
-            }
-        }))
-
-        // const hasAutoMergeLabel = pullRequestData?.labels.find(
-        //     label => label.name === constants.autoMergeLabel
-        // )
-        // const hasAutoSquashLabel = pullRequestData?.labels.find(
-        //     label => label.name === constants.autoSquashLabel
-        // )
-
-        // if (hasAutoMergeLabel) {
-        //     context.log(`Removing auto-merge label`)
-        //     await pullRequest.removeLabel(constants.autoMergeLabel)
-        //     context.log(`Removed auto-merge label`)
-        // }
-        // if (hasAutoSquashLabel) {
-        //     context.log(`Removing auto-squash label`)
-        //     await pullRequest.removeLabel(constants.autoSquashLabel)
-        //     context.log(`Removed auto-squash label`)
-        // }
+        // constants.labelMap.forEach((async(labelValue: string, labelKey: string) => {
+        //     if (pullRequestData?.labels.find(
+        //         label => label.name === labelValue
+        //     )) {
+        //         // remove the label 
+        //         context.log(`Removing ${labelValue} label`)
+        //         await pullRequest.removeLabel(labelValue)
+        //         context.log(`Removed ${labelValue} label`)
+        //     }
+        // }))
 
         return true // invalid user
     }

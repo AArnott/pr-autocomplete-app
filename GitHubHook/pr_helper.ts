@@ -13,7 +13,7 @@ type PRInfo = {
 	sender: Webhooks.WebhookPayloadPullRequestSender;
 }
 
-enum MergeMethods {
+export enum MergeMethods {
 	merge = 'merge',
 	squash = 'squash',
 	rebase = 'rebase'
@@ -59,7 +59,7 @@ export class PullRequest {
 			pull_number: this.pullRequestNumber,
 			merge_method: mergeMethod,
 		})
-		
+
 		return response.status === 200
 	}
 
