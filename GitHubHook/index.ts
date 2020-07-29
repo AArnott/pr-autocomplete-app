@@ -125,6 +125,24 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
             return
         }
 
+        // Never complete a PR when *anyone* has requested changes (regardless of push permissions or branch protections).
+        const reviews = await pullRequest.getReviews()
+        context.log("Reviews: " + JSON.stringify(reviews))
+        const lastReviewVote = new Map<string, string>();
+        for (const review of reviews) {
+            lastReviewVote[review.user.login] = review.state;
+        }
+
+        for (const voter in lastReviewVote) {
+            if (Object.prototype.hasOwnProperty.call(lastReviewVote, voter)) {
+                const vote: string = lastReviewVote[voter];
+                if (vote === 'CHANGES_REQUESTED') {
+                    context.log(`Changes requested by ${voter}. Not merging.`);
+                    return;
+                }
+            }
+        }
+
         // Merge the current pull request
         context.log("Attempting to merge...")
         const mergeSucceeded = await pullRequest.merge(autoCompleteMethod)

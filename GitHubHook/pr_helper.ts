@@ -2,7 +2,10 @@
 // import {GitHub} from '@actions/github/lib/utils'
 
 import { Octokit } from '@octokit/rest'
-import { PullsGetResponseData } from '@octokit/types/dist-types'
+import {
+	PullsGetResponseData,
+	PullsListReviewsResponseData,
+} from '@octokit/types/dist-types'
 import { Webhooks } from '@octokit/webhooks'
 
 type PRInfo = {
@@ -27,6 +30,20 @@ export class PullRequest {
 		}
 
 		return this.data
+	}
+
+	async getReviews() : Promise<PullsListReviewsResponseData>{
+		const response = await this.octokit.pulls.listReviews({
+			owner: this.pull_request.repository.owner.login,
+			repo: this.pull_request.repository.name,
+			pull_number: this.pullRequestNumber,
+		})
+
+		if (response.status !== 200) {
+			throw new Error("Failed in request for reviews.");
+		}
+
+		return response.data
 	}
 
 	async merge(mergeMethod: 'merge' | 'squash' | 'rebase' | undefined): Promise<boolean> {
