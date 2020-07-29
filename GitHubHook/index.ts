@@ -32,70 +32,39 @@ const constants = {
 }
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-    context.log('HTTP trigger function processed a request.');
-    context.log(`Has GitHubAppId: ${Inputs.GitHubAppId}`);
-    context.log(`Has GitHubAppPrivateKey?: ${!!Inputs.GitHubAppPrivateKey}`);
-    context.log(`Has GitHubWebhookSecret?: ${!!Inputs.GitHubWebhookSecret}`);
     context.log(`Event type: ${req.headers['x-github-event']}`)
-
-    webhooks.on('check_run.completed', evt => {
-        try {
-            context.log('check_run.completed');
-            context.log(JSON.stringify(evt))
-            // evt.payload.installation.id
-        } catch (err) {
-            context.log('Error occurred: ' + err);
-            throw err;
-        }
-    })
+    context.log(`Event ID: ${req.headers['x-github-delivery']}`)
 
     webhooks.on('pull_request', async evt => {
         try {
-            context.log('pull_request');
-            context.log(JSON.stringify(evt))
+            context.log(`${context.req.headers['x-github-event']}.${evt.payload.action}`)
+            const octokit = getOctokit((evt.payload as any).installation.id)
+            const pullRequest = new PullRequest(evt.payload.pull_request.number, evt.payload, octokit)
 
-            const pullRequest = new PullRequest(evt.payload.pull_request.number,
-                evt.payload.repository.name,
-                evt.payload.repository.owner.login,
-                evt.payload.sender.login,
-                getOctokit((evt.payload as any).installation.id))
+            if (evt.payload.action == 'synchronize') {
+                if (await isInvalidatingUser(pullRequest, octokit, context)) {
+                    return
+                }
+            }
 
-            await processPullRequest(pullRequest, getOctokit((evt.payload as any).installation.id), context)
+            await processPullRequest(pullRequest, context)
         } catch (err) {
-            context.log('Error occurred: ' + err);
+            context.log(err);
             throw err;
         }
     })
 
     webhooks.on('check_suite.completed', async evt => {
         try {
-            context.log('check_suite.completed');
-            context.log(JSON.stringify(evt))
-            const pullRequests = evt.payload.check_suite.pull_requests
+            context.log(`${context.req.headers['x-github-event']}.${evt.payload.action}`)
+            const octokit = getOctokit(evt.payload.installation.id)
 
-            if (pullRequests && pullRequests.length > 0) {
-                const pullRequestNumber = pullRequests[0].number
-                const pullRequest = new PullRequest(pullRequestNumber,
-                    evt.payload.repository.name,
-                    evt.payload.repository.owner.login,
-                    evt.payload.sender.login,
-                    getOctokit((evt.payload as any).installation.id))
-
-                await processPullRequest(pullRequest, getOctokit(evt.payload.installation.id), context)
+            for (const pr of evt.payload.check_suite.pull_requests) {
+                const pullRequest = new PullRequest(pr.number, evt.payload, octokit)
+                await processPullRequest(pullRequest, context)
             }
         } catch (err) {
-            context.log('Error occurred: ' + err);
-            throw err;
-        }
-    })
-
-    // parse pull request event
-    webhooks.on("pull_request.opened", (evt) => {
-        try {
-            context.log('pull_request.opened')
-            context.log(JSON.stringify(evt))
-        } catch (err) {
-            context.log('Error occurred: ' + err);
+            context.log(err);
             throw err;
         }
     })
@@ -108,18 +77,14 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
             signature: context.req.headers['x-hub-signature'],
         });
     } catch (err) {
-        context.log('Error occurred: ' + err);
+        context.log(err);
         throw err;
     }
 };
 
-async function processPullRequest(pullRequest: PullRequest, octokit: Octokit, context: Context): Promise<void> {
+async function processPullRequest(pullRequest: PullRequest, context: Context): Promise<void> {
     // Get the pr data
     const pullRequestData = await pullRequest.get()
-    if (!pullRequestData) {
-        context.log('Skipping because it is not a pull request.')
-        return
-    }
 
     // Find the labels that indicates the auto completion
     const hasAutoMergeLabel = pullRequestData?.labels.find(
@@ -128,38 +93,6 @@ async function processPullRequest(pullRequest: PullRequest, octokit: Octokit, co
     const hasAutoSquashLabel = pullRequestData?.labels.find(
         label => label.name === constants.autoSquashLabel
     )
-
-    // get person who triggered the event to access their permission
-    const username = pullRequest.actor
-    // get their response data using octokit
-    const response = await octokit.repos.getCollaboratorPermissionLevel(
-        {
-            owner: pullRequest.owner,
-            repo: pullRequest.repo,
-            username: username,
-        }
-    )
-
-    // get user's permission status from response object
-    let userPermission = response.data.permission // Permission level of actual user
-
-    // if the user does not have write access we must remove the label
-    if (!constants.required_permissions.includes(userPermission)) {
-        context.log(`User ${username} does not have permission. Permission: ${userPermission}`)
-
-        if (hasAutoMergeLabel) {
-            context.log(`User ${username} removing automerge label: ${userPermission}`)
-            await pullRequest.removeLabel(constants.autoMergeLabel)
-        }
-        if (hasAutoSquashLabel) {
-            context.log(`User ${username} removing autosquash label: ${userPermission}`)
-            await pullRequest.removeLabel(constants.autoSquashLabel)
-        }
-
-        // abort the process because they don't have write/admin permission and cannot make changes
-        // once the labels have been assigned
-        return
-    }
 
     // Check for valid labels
     if (hasAutoMergeLabel && hasAutoSquashLabel) {
@@ -183,10 +116,55 @@ async function processPullRequest(pullRequest: PullRequest, octokit: Octokit, co
         }
 
         // Merge the current pull request
+        context.log("Attempting to merge...")
         const mergeSucceeded = await pullRequest.merge(autoCompleteMethod)
         context.log(`Merge result: ${mergeSucceeded ? 'succeeded' : 'failed'}`)
     }
 
+}
+
+async function isInvalidatingUser(pullRequest: PullRequest, octokit: Octokit, context: Context): Promise<boolean> {
+    // Get the pr data
+    const pullRequestData = await pullRequest.get()
+
+    // get person who triggered the event to access their permission
+    const username = pullRequest.pull_request.sender.login
+    // get their response data using octokit
+    const response = await octokit.repos.getCollaboratorPermissionLevel(
+        {
+            owner: pullRequest.pull_request.repository.owner.login,
+            repo: pullRequest.pull_request.repository.name,
+            username: username,
+        }
+    )
+
+    // get user's permission status from response object
+    let userPermission = response.data.permission // Permission level of actual user
+
+    // if the user does not have write access we must remove the label
+    if (!constants.required_permissions.includes(userPermission)) {
+        context.log(`User ${username} does not have permission. Permission: ${userPermission}`)
+
+        const hasAutoMergeLabel = pullRequestData?.labels.find(
+            label => label.name === constants.autoMergeLabel
+        )
+        const hasAutoSquashLabel = pullRequestData?.labels.find(
+            label => label.name === constants.autoSquashLabel
+        )
+
+        if (hasAutoMergeLabel) {
+            context.log(`Removing auto-merge label`)
+            await pullRequest.removeLabel(constants.autoMergeLabel)
+        }
+        if (hasAutoSquashLabel) {
+            context.log(`Removing auto-squash label`)
+            await pullRequest.removeLabel(constants.autoSquashLabel)
+        }
+
+        return true // invalid user
+    }
+
+    return false
 }
 
 export default httpTrigger;
