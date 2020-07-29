@@ -110,7 +110,7 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
             label => label.name === labelKey
         )) {
             labelCount ++
-            autoCompleteMethod = autoCompleteMethod[labelValue]
+            autoCompleteMethod = MergeMethods[labelValue]
         }
     })
 
