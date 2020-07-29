@@ -69,17 +69,12 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         }
     })
 
-    try {
-        await webhooks.verifyAndReceive({
-            id: context.req.headers['x-github-delivery'],
-            name: context.req.headers['x-github-event'],
-            payload: context.req.body,
-            signature: context.req.headers['x-hub-signature'],
-        });
-    } catch (err) {
-        context.log(err);
-        throw err;
-    }
+    await webhooks.verifyAndReceive({
+        id: context.req.headers['x-github-delivery'],
+        name: context.req.headers['x-github-event'],
+        payload: context.req.body,
+        signature: context.req.headers['x-hub-signature'],
+    });
 };
 
 async function processPullRequest(pullRequest: PullRequest, context: Context): Promise<void> {
