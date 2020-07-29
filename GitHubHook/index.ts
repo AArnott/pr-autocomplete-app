@@ -13,7 +13,7 @@ function getOctokit(installationId?: number) {
     return new Octokit({
         auth: {
             id: Inputs.GitHubAppId,
-            privateKey: Inputs.GitHubAppPrivateKey.replace('\\n', '\n'), // we use "\n" literals as placeholders for line endings in the Azure Properties
+            privateKey: Inputs.GitHubAppPrivateKey.split('\\n').join('\n'), // we use "\n" literals as placeholders for line endings in the Azure Properties
             installationId,
         },
         authStrategy: createAppAuth,
