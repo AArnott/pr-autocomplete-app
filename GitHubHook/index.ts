@@ -21,12 +21,7 @@ function getOctokit(installationId?: number) {
 }
 
 const constants = {
-    // labelMap : new Map([
-    //     ["merge", "auto-merge"],
-    //     ["squash", "auto-squash"],
-    //     ["rebase", "auto-rebase"]
-    // ]),
-    reverseLabelMap : new Map([
+    labelMap : new Map([
         ["auto-merge", "merge"],
         ["auto-squash", "squash"],
         ["auto-rebase", "rebase"]
@@ -109,16 +104,8 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
     // if multiple labels we return because of ambiguous state
     let labelCount = 0
     let autoCompleteMethod: MergeMethods
-    // constants.labelMap.forEach((labelValue: string, labelKey: string) => {
-    //     if (pullRequestData?.labels.find(
-    //         label => label.name === labelValue
-    //     )) {
-    //         labelCount ++
-    //         autoCompleteMethod = autoCompleteMethod[labelKey]
-    //     }
-    // })
 
-    constants.reverseLabelMap.forEach((labelValue: string, labelKey: string) => {
+    constants.labelMap.forEach((labelValue: string, labelKey: string) => {
         if (pullRequestData?.labels.find(
             label => label.name === labelKey
         )) {
@@ -194,24 +181,12 @@ async function isInvalidatingUser(pullRequest: PullRequest, octokit: Octokit, co
     if (!constants.required_permissions.includes(userPermission)) {
         context.log(`User ${username} does not have permission. Permission: ${userPermission}`)
         
-        const labels = pullRequestData?.labels.filter(label => constants.reverseLabelMap.has(label.name))
+        const labels = pullRequestData?.labels.filter(label => constants.labelMap.has(label.name))
         for (const label of labels) {
             context.log(`Removing ${label.name} label`)
             await pullRequest.removeLabel(label.name)
             context.log(`Remove ${label.name} label`)
         }
-
-        // constants.labelMap.forEach((async(labelValue: string, labelKey: string) => {
-        //     if (pullRequestData?.labels.find(
-        //         label => label.name === labelValue
-        //     )) {
-        //         // remove the label 
-        //         context.log(`Removing ${labelValue} label`)
-        //         await pullRequest.removeLabel(labelValue)
-        //         context.log(`Removed ${labelValue} label`)
-        //     }
-        // }))
-
         return true // invalid user
     }
 
