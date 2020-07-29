@@ -39,9 +39,14 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     context.log(`Event type: ${req.headers['x-github-event']}`)
 
     webhooks.on('check_run.completed', evt => {
-        context.log('check_run.completed');
-        context.log(JSON.stringify(evt))
-        // evt.payload.installation.id
+        try {
+            context.log('check_run.completed');
+            context.log(JSON.stringify(evt))
+            // evt.payload.installation.id
+        } catch (err) {
+            context.log('Error occurred: ' + err);
+            throw err;
+        }
     })
 
     webhooks.on('pull_request', async evt => {
@@ -63,26 +68,36 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     })
 
     webhooks.on('check_suite.completed', async evt => {
-        context.log('check_suite.completed');
-        context.log(JSON.stringify(evt))
-        const pullRequests = evt.payload.check_suite.pull_requests
+        try {
+            context.log('check_suite.completed');
+            context.log(JSON.stringify(evt))
+            const pullRequests = evt.payload.check_suite.pull_requests
 
-        if (pullRequests && pullRequests.length > 0) {
-            const pullRequestNumber = pullRequests[0].number
-            const pullRequest = new PullRequest(pullRequestNumber,
-                evt.payload.repository.name,
-                evt.payload.repository.owner.login,
-                evt.payload.sender.login,
-                getOctokit((evt.payload as any).installation.id))
+            if (pullRequests && pullRequests.length > 0) {
+                const pullRequestNumber = pullRequests[0].number
+                const pullRequest = new PullRequest(pullRequestNumber,
+                    evt.payload.repository.name,
+                    evt.payload.repository.owner.login,
+                    evt.payload.sender.login,
+                    getOctokit((evt.payload as any).installation.id))
 
-            await processPullRequest(pullRequest, getOctokit(evt.payload.installation.id), context)
+                await processPullRequest(pullRequest, getOctokit(evt.payload.installation.id), context)
+            }
+        } catch (err) {
+            context.log('Error occurred: ' + err);
+            throw err;
         }
     })
 
     // parse pull request event
     webhooks.on("pull_request.opened", (evt) => {
-        context.log('pull_request.opened')
-        context.log(JSON.stringify(evt))
+        try {
+            context.log('pull_request.opened')
+            context.log(JSON.stringify(evt))
+        } catch (err) {
+            context.log('Error occurred: ' + err);
+            throw err;
+        }
     })
 
     try {
