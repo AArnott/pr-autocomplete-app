@@ -4,7 +4,7 @@
 
 ### Set-up and usage
 1. Install the [Github App](https://github.com/apps/pr-autocomplete) into your repository
-2. Add autocomplete label to any PR that should be autocompleted (`auto_merge` `auto_squash` `auto_rebase`)
+2. Add autocomplete label to any PR that should be autocompleted (`auto-merge` `auto-squash` `auto-rebase`)
 3. PR will be automatically merged once all conditions are met and merging is safe to do
 
 ### Overview: Pull Request Validation
@@ -23,9 +23,9 @@ A pull request is considered ready when:
 ### Configuration
 
 The following **autocomplete** options are supported:
-- `auto_merge`
-- `auto_squash`
-- `auto_rebase`
+- `auto-merge`
+- `auto-squash`
+- `auto-rebase`
 
 PR will be merged, squashed or rebased according to repository-wide settings
 - Branches will be automatically deleted only if setting is activated
