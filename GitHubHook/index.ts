@@ -50,6 +50,10 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 			}
 
 			context.log(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
+			if (evt.payload.action === "closed") {
+				return
+			}
+
 			const octokit = getOctokit((evt.payload as any).installation.id)
 			const pullRequest = new PullRequest(evt.payload.pull_request.number, evt.payload, octokit)
 
