@@ -1,28 +1,23 @@
-// import {Context} from '@actions/github/lib/context'
-// import {GitHub} from '@actions/github/lib/utils'
-
-import { Octokit } from '@octokit/rest'
-import {
-	PullsGetResponseData,
-	PullsListReviewsResponseData,
-} from '@octokit/types/dist-types'
-import { Webhooks } from '@octokit/webhooks'
+import { Octokit } from "@octokit/rest"
+import { PullsGetResponseData, PullsListReviewsResponseData } from "@octokit/types/dist-types"
+import { Webhooks } from "@octokit/webhooks"
 
 type PRInfo = {
-	repository: Webhooks.PayloadRepository;
-	sender: Webhooks.WebhookPayloadPullRequestSender;
+	repository: Webhooks.PayloadRepository
+	sender: Webhooks.WebhookPayloadPullRequestSender
 }
 
 export enum MergeMethods {
-	merge = 'merge',
-	squash = 'squash',
-	rebase = 'rebase'
+	merge = "merge",
+	squash = "squash",
+	rebase = "rebase",
 }
 
 export class PullRequest {
-	private data?: PullsGetResponseData;
+	private data?: PullsGetResponseData
 
 	constructor(readonly pullRequestNumber: number, readonly pull_request: PRInfo, private octokit: Octokit) {
+		// blank (but keep prettier happy)
 	}
 
 	async get(): Promise<PullsGetResponseData> {
@@ -46,13 +41,13 @@ export class PullRequest {
 		})
 
 		if (response.status !== 200) {
-			throw new Error("Failed in request for reviews.");
+			throw new Error("Failed in request for reviews.")
 		}
 
 		return response.data
 	}
 
-	async merge(mergeMethod:MergeMethods): Promise<boolean> {
+	async merge(mergeMethod: MergeMethods): Promise<boolean> {
 		const response = await this.octokit.pulls.merge({
 			owner: this.pull_request.repository.owner.login,
 			repo: this.pull_request.repository.name,
