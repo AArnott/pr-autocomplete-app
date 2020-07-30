@@ -1,6 +1,6 @@
 export default {
 	get GitHubAppId(): string {
-		return GetDefinedEnvVar("GetHubAppId")
+		return GetDefinedEnvVar("GitHubAppId")
 	},
 	get GitHubAppPrivateKey(): string {
 		return GetDefinedEnvVar("GitHubAppPrivateKey")
