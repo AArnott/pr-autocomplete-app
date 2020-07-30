@@ -9,7 +9,7 @@
 		"watch": "tsc -w",
 		"prestart": "yarn run build",
 		"start": "func start",
-		"test": "echo \"No tests yet...\""
+		"test": "jest"
 	},
 	"dependencies": {
 		"@octokit/auth-app": "^2.4.10",
@@ -18,10 +18,14 @@
 	},
 	"devDependencies": {
 		"@azure/functions": "^1.0.2-beta2",
+		"@types/jest": "^26.0.7",
 		"@typescript-eslint/parser": "^3.7.1",
 		"eslint": "^7.5.0",
 		"eslint-plugin-github": "^4.1.1",
 		"eslint-plugin-jest": "^23.19.0",
-		"typescript": "^3.3.3"
+		"jest": "^26.1.0",
+		"mocked-env": "^1.3.2",
+		"ts-jest": "^26.1.4",
+		"typescript": "^3.9.7"
 	}
 }

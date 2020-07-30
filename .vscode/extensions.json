@@ -5,6 +5,9 @@
 	// List of extensions which should be recommended for users of this workspace.
 	"recommendations": [
 		"ms-azuretools.vscode-azurefunctions",
+		"orta.vscode-jest",
+		"firsttris.vscode-jest-runner",
+		"hbenl.vscode-jasmine-test-adapter",
 		"dbaeumer.vscode-eslint",
 		"editorconfig.editorconfig"
 	],

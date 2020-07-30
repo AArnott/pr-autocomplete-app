@@ -1,7 +1,13 @@
 export default {
-	GitHubAppId: GetDefinedEnvVar("GetHubAppId"),
-	GitHubAppPrivateKey: GetDefinedEnvVar("GitHubAppPrivateKey"),
-	GitHubWebhookSecret: GetDefinedEnvVar("GitHubWebhookSecret"),
+	get GitHubAppId(): string {
+		return GetDefinedEnvVar("GetHubAppId")
+	},
+	get GitHubAppPrivateKey(): string {
+		return GetDefinedEnvVar("GitHubAppPrivateKey")
+	},
+	get GitHubWebhookSecret(): string {
+		return GetDefinedEnvVar("GitHubWebhookSecret")
+	},
 }
 
 function GetDefinedEnvVar(name: string): string {
