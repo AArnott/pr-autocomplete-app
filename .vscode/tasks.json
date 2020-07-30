@@ -1,31 +1,31 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "type": "func",
-      "command": "host start",
-      "problemMatcher": "$func-watch",
-      "isBackground": true,
-      "dependsOn": "yarn build"
-    },
-    {
-      "type": "shell",
-      "label": "yarn build",
-      "command": "yarn run build",
-      "dependsOn": "yarn install",
-      "problemMatcher": "$tsc"
-    },
-    {
-      "type": "shell",
-      "label": "yarn install",
-      "command": "yarn"
-    },
-    {
-      "type": "shell",
-      "label": "yarn prune",
-      "command": "yarn prune --production",
-      "dependsOn": "yarn build",
-      "problemMatcher": []
-    }
-  ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "func",
+			"command": "host start",
+			"problemMatcher": "$func-watch",
+			"isBackground": true,
+			"dependsOn": "yarn build"
+		},
+		{
+			"type": "shell",
+			"label": "yarn build",
+			"command": "yarn run build",
+			"dependsOn": "yarn install",
+			"problemMatcher": "$tsc"
+		},
+		{
+			"type": "shell",
+			"label": "yarn install",
+			"command": "yarn"
+		},
+		{
+			"type": "shell",
+			"label": "yarn prune",
+			"command": "yarn prune --production",
+			"dependsOn": "yarn build",
+			"problemMatcher": []
+		},
+	]
 }

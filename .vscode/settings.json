@@ -4,5 +4,6 @@
     "azureFunctions.projectLanguage": "TypeScript",
     "azureFunctions.projectRuntime": "~3",
     "debug.internalConsoleOptions": "neverOpen",
-    "azureFunctions.preDeployTask": "yarn prune"
+    "azureFunctions.preDeployTask": "yarn prune",
+    "javascript.format.semicolons": "remove"
 }
