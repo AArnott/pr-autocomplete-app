@@ -1,21 +1,21 @@
 {
-  "name": "pr-autocomplete-app",
-  "version": "1.0.0",
-  "description": "",
-  "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "prestart": "yarn run build",
-    "start": "func start",
-    "test": "echo \"No tests yet...\""
-  },
-  "dependencies": {
-    "@octokit/auth-app": "^2.4.10",
-    "@octokit/rest": "^18.0.3",
-    "@octokit/webhooks": "^7.6.5"
-  },
-  "devDependencies": {
-    "@azure/functions": "^1.0.2-beta2",
-    "typescript": "^3.3.3"
-  }
+	"name": "pr-autocomplete-app",
+	"version": "1.0.0",
+	"description": "",
+	"scripts": {
+		"build": "tsc",
+		"watch": "tsc -w",
+		"prestart": "yarn run build",
+		"start": "func start",
+		"test": "echo \"No tests yet...\""
+	},
+	"dependencies": {
+		"@octokit/auth-app": "^2.4.10",
+		"@octokit/rest": "^18.0.3",
+		"@octokit/webhooks": "^7.6.5"
+	},
+	"devDependencies": {
+		"@azure/functions": "^1.0.2-beta2",
+		"typescript": "^3.3.3"
+	}
 }

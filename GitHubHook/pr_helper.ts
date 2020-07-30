@@ -38,7 +38,7 @@ export class PullRequest {
 		return this.data
 	}
 
-	async getReviews() : Promise<PullsListReviewsResponseData>{
+	async getReviews(): Promise<PullsListReviewsResponseData> {
 		const response = await this.octokit.pulls.listReviews({
 			owner: this.pull_request.repository.owner.login,
 			repo: this.pull_request.repository.name,
