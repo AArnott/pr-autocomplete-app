@@ -39,8 +39,16 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 		secret: Inputs.GitHubWebhookSecret,
 	})
 
+	if (!context.req) {
+		throw new Error("No request data.")
+	}
+
 	webhooks.on("pull_request", async evt => {
 		try {
+			if (!context.req) {
+				throw new Error("No request data.")
+			}
+
 			context.log(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
 			const octokit = getOctokit((evt.payload as any).installation.id)
 			const pullRequest = new PullRequest(evt.payload.pull_request.number, evt.payload, octokit)
@@ -60,6 +68,10 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
 	webhooks.on("pull_request_review", async evt => {
 		try {
+			if (!context.req) {
+				throw new Error("No request data.")
+			}
+
 			context.log(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
 			const octokit = getOctokit((evt.payload as any).installation.id)
 			const pullRequest = new PullRequest(evt.payload.pull_request.number, evt.payload, octokit)
@@ -73,6 +85,14 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
 	webhooks.on("check_suite.completed", async evt => {
 		try {
+			if (!context.req) {
+				throw new Error("No request data.")
+			}
+
+			if (!evt.payload.installation) {
+				throw new Error("No installation property in payload.")
+			}
+
 			context.log(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
 			const octokit = getOctokit(evt.payload.installation.id)
 
@@ -100,13 +120,13 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
 
 	// if multiple labels we return because of ambiguous state
 	let labelCount = 0
-	let autoCompleteMethod: MergeMethods
+	let autoCompleteMethod: MergeMethods | undefined
 
 	// eslint-disable-next-line github/array-foreach
-	constants.labelMap.forEach((labelValue: string, labelKey: string) => {
-		if (pullRequestData?.labels.find(label => label.name === labelKey)) {
+	constants.labelMap.forEach((mergeMethod: string, labelName: string) => {
+		if (pullRequestData?.labels.find(label => label.name === labelName)) {
 			labelCount++
-			autoCompleteMethod = MergeMethods[labelValue]
+			autoCompleteMethod = mergeMethod as MergeMethods
 		}
 	})
 
@@ -133,13 +153,13 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
 			// Don't consider comment-only to be a vote one way or another,
 			// to be consistent with GitHub UI.
 			if (review.state !== constants.comment) {
-				lastReviewVote[review.user.login] = review.state
+				lastReviewVote.set(review.user.login, review.state)
 			}
 		}
 
 		for (const voter in lastReviewVote) {
 			if (Object.prototype.hasOwnProperty.call(lastReviewVote, voter)) {
-				const vote: string = lastReviewVote[voter]
+				const vote: string = lastReviewVote.get(voter)!
 				if (vote === constants.request_changes) {
 					context.log(`Changes requested by ${voter}. Not merging.`)
 					return
