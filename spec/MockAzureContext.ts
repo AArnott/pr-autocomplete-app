@@ -1,4 +1,4 @@
-import { IMockMessage } from "./MockMessages"
+import { IMockMessage } from "./MockWebHookNotifications"
 import { HttpRequest, Context } from "@azure/functions"
 import MockLogger from "./MockLogger"
 import Webhooks from "@octokit/webhooks"

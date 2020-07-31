@@ -1,6 +1,6 @@
 import func from "../GitHubHook/index"
 import { authInputs } from "../GitHubHook/OctokitAuth"
-import { MockMessages } from "./MockMessages"
+import { MockNotifications } from "./MockWebHookNotifications"
 import { MockReplies } from "./MockApiReplies"
 import { NewContext } from "./MockAzureContext"
 import nock from "nock"
@@ -13,13 +13,13 @@ describe("Azure Function", () => {
 	})
 
 	it("does nothing with pull_request.closed", async () => {
-		const context = NewContext(MockMessages.pull_request.closed)
+		const context = NewContext(MockNotifications.pull_request.closed)
 		await func(context, context.req)
 	})
 
 	it("does nothing when review is submitted for completed PR", async () => {
 		nock("https://api.github.com").get("/repos/AArnott/pr-autocomplete-scratch/pulls/16").reply(200, MockReplies.get.pr.completed)
-		const context = NewContext(MockMessages.pull_request_review.submitted)
+		const context = NewContext(MockNotifications.pull_request_review.submitted)
 		authInputs.auth = "mock-token"
 		await func(context, context.req)
 	})
