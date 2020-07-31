@@ -1,8 +1,10 @@
 import { Octokit } from "@octokit/rest"
 import { PullsGetResponseData, PullsListReviewsResponseData } from "@octokit/types/dist-types"
 import { Webhooks } from "@octokit/webhooks"
+import { Context } from "@azure/functions"
 
 type PRInfo = {
+	pull_request?: Webhooks.WebhookPayloadPullRequestPullRequest | Webhooks.WebhookPayloadPullRequestReviewPullRequest
 	repository: Webhooks.PayloadRepository
 	sender: Webhooks.WebhookPayloadPullRequestSender
 }
@@ -16,11 +18,42 @@ export enum MergeMethods {
 export class PullRequest {
 	private data?: PullsGetResponseData
 
-	constructor(readonly pullRequestNumber: number, readonly pull_request: PRInfo, private octokit: Octokit) {
+	constructor(readonly context: Context, readonly pullRequestNumber: number, readonly pull_request: PRInfo, private octokit: Octokit) {
 		// blank (but keep prettier happy)
 	}
 
-	async get(): Promise<PullsGetResponseData> {
+	async isMergeable(): Promise<boolean> {
+		// Try to get the mergeable state from the push notification, if possible.
+		let mergeable: boolean | null | undefined = (this.pull_request.pull_request as Webhooks.WebhookPayloadPullRequestPullRequest)?.mergeable
+		if (mergeable === undefined || mergeable === null) {
+			const data = await this.get()
+			mergeable = data.mergeable
+		}
+
+		return mergeable
+	}
+
+	async mergeable_state(): Promise<string> {
+		let mergeable_state: string | undefined = (this.pull_request.pull_request as Webhooks.WebhookPayloadPullRequestPullRequest)
+			?.mergeable_state
+		if (mergeable_state === undefined || mergeable_state === null) {
+			const data = await this.get()
+			mergeable_state = data.mergeable_state
+		}
+
+		return mergeable_state
+	}
+
+	async labels(): Promise<{ name: string }[]> {
+		if (this.pull_request.pull_request) {
+			return this.pull_request.pull_request.labels
+		} else {
+			const data = await this.get()
+			return data.labels
+		}
+	}
+
+	private async get(): Promise<PullsGetResponseData> {
 		if (!this.data) {
 			const response = await this.octokit.pulls.get({
 				owner: this.pull_request.repository.owner.login,
@@ -28,6 +61,7 @@ export class PullRequest {
 				pull_number: this.pullRequestNumber,
 			})
 			this.data = response.data
+			this.context.log.verbose(`Obtained pull request data: ${JSON.stringify(response.data)}`)
 		}
 
 		return this.data

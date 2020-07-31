@@ -30,9 +30,12 @@ export const MockNotifications = {
 	},
 	pull_request_review: {
 		submitted: ParseMockMessage("pull_request_review.submitted.json"),
+		submitted_closedPR: ParseMockMessage("pull_request_review.submitted_closedPR.json"),
+		submitted_openUnlabeled: ParseMockMessage("pull_request_review.submitted_openUnlabeled.json"),
 	},
 	pull_request: {
 		labeled: ParseMockMessage("pull_request.labeled.json"),
+		unlabeled: ParseMockMessage("pull_request.unlabeled.json"),
 		synchronize: ParseMockMessage("pull_request.synchronize.json"),
 		closed: ParseMockMessage("pull_request.closed.json"),
 	},

@@ -1,0 +1,23 @@
+{
+	"permission": "admin",
+	"user": {
+			"login": "AArnott",
+			"id": 3548,
+			"node_id": "MDQ6VXNlcjM1NDg=",
+			"avatar_url": "https://avatars2.githubusercontent.com/u/3548?v=4",
+			"gravatar_id": "",
+			"url": "https://api.github.com/users/AArnott",
+			"html_url": "https://github.com/AArnott",
+			"followers_url": "https://api.github.com/users/AArnott/followers",
+			"following_url": "https://api.github.com/users/AArnott/following{/other_user}",
+			"gists_url": "https://api.github.com/users/AArnott/gists{/gist_id}",
+			"starred_url": "https://api.github.com/users/AArnott/starred{/owner}{/repo}",
+			"subscriptions_url": "https://api.github.com/users/AArnott/subscriptions",
+			"organizations_url": "https://api.github.com/users/AArnott/orgs",
+			"repos_url": "https://api.github.com/users/AArnott/repos",
+			"events_url": "https://api.github.com/users/AArnott/events{/privacy}",
+			"received_events_url": "https://api.github.com/users/AArnott/received_events",
+			"type": "User",
+			"site_admin": false
+	}
+}

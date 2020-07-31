@@ -44,7 +44,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 			}
 
 			const octokit = getOctokit((evt.payload as any).installation.id)
-			const pullRequest = new PullRequest(evt.payload.pull_request.number, evt.payload, octokit)
+			const pullRequest = new PullRequest(context, evt.payload.pull_request.number, evt.payload, octokit)
 
 			if (evt.payload.action === "synchronize") {
 				if (await isInvalidatingUser(pullRequest, octokit, context)) {
@@ -66,8 +66,13 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 			}
 
 			context.log(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
+
+			if (evt.payload.pull_request.state === "closed") {
+				return
+			}
+
 			const octokit = getOctokit((evt.payload as any).installation.id)
-			const pullRequest = new PullRequest(evt.payload.pull_request.number, evt.payload, octokit)
+			const pullRequest = new PullRequest(context, evt.payload.pull_request.number, evt.payload, octokit)
 
 			await processPullRequest(pullRequest, context)
 		} catch (err) {
@@ -90,7 +95,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 			const octokit = getOctokit(evt.payload.installation.id)
 
 			for (const pr of evt.payload.check_suite.pull_requests) {
-				const pullRequest = new PullRequest(pr.number, evt.payload, octokit)
+				const pullRequest = new PullRequest(context, pr.number, evt.payload, octokit)
 				await processPullRequest(pullRequest, context)
 			}
 		} catch (err) {
@@ -108,16 +113,14 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 }
 
 async function processPullRequest(pullRequest: PullRequest, context: Context): Promise<void> {
-	// Get the pr data
-	const pullRequestData = await pullRequest.get()
-
 	// if multiple labels we return because of ambiguous state
 	let labelCount = 0
 	let autoCompleteMethod: MergeMethods | undefined
+	const labels = await pullRequest.labels()
 
 	// eslint-disable-next-line github/array-foreach
 	constants.labelMap.forEach((mergeMethod: string, labelName: string) => {
-		if (pullRequestData?.labels.find(label => label.name === labelName)) {
+		if (labels.find(label => label.name === labelName)) {
 			labelCount++
 			autoCompleteMethod = mergeMethod as MergeMethods
 		}
@@ -128,13 +131,13 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
 	}
 
 	if (autoCompleteMethod) {
-		context.log(`pullRequestData: ${JSON.stringify(pullRequestData)}`)
-		if (!constants.ready_states.includes(pullRequestData.mergeable_state)) {
-			context.log(`Not completing PR because mergeable_state is ${pullRequestData.mergeable_state}`)
+		const mergeable_state = await pullRequest.mergeable_state()
+		if (!constants.ready_states.includes(mergeable_state)) {
+			context.log(`Not completing PR because mergeable_state is ${mergeable_state}`)
 			return
 		}
 
-		if (!pullRequestData.mergeable) {
+		if (!(await pullRequest.isMergeable())) {
 			return
 		}
 
@@ -168,9 +171,6 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
 }
 
 async function isInvalidatingUser(pullRequest: PullRequest, octokit: Octokit, context: Context): Promise<boolean> {
-	// Get the pr data
-	const pullRequestData = await pullRequest.get()
-
 	// get person who triggered the event to access their permission
 	const username = pullRequest.pull_request.sender.login
 	// get their response data using octokit
@@ -187,8 +187,9 @@ async function isInvalidatingUser(pullRequest: PullRequest, octokit: Octokit, co
 	if (!constants.required_permissions.includes(userPermission)) {
 		context.log(`User ${username} does not have permission. Permission: ${userPermission}`)
 
-		const labels = pullRequestData?.labels.filter(label => constants.labelMap.has(label.name))
-		for (const label of labels) {
+		const labels = await pullRequest.labels()
+		const filteredLabels = labels.filter(label => constants.labelMap.has(label.name))
+		for (const label of filteredLabels) {
 			context.log(`Removing ${label.name} label`)
 			await pullRequest.removeLabel(label.name)
 			context.log(`Remove ${label.name} label`)
