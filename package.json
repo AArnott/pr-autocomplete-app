@@ -22,7 +22,7 @@
 		"@typescript-eslint/parser": "^3.7.1",
 		"eslint": "^7.5.0",
 		"eslint-plugin-github": "^4.1.1",
-		"eslint-plugin-jest": "^23.19.0",
+		"eslint-plugin-jest": "^23.20.0",
 		"jest": "^26.2.2",
 		"mocked-env": "^1.3.2",
 		"ts-jest": "^26.1.4",
