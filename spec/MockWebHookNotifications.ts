@@ -19,10 +19,12 @@ export const MockNotifications = {
 		created: {
 			fromFork: ParseMockMessage("check_run.created_fromFork.json"),
 		},
+		completed: ParseMockMessage("check_run.completed.json"),
 	},
 	check_suite: {
 		completed: {
 			fromFork: ParseMockMessage("check_suite.completed_fromFork.json"),
+			sameRepo: ParseMockMessage("check_suite.completed.json"),
 		},
 	},
 	installation_repositories: {

@@ -70,4 +70,27 @@ describe("Web hook", () => {
 
 		await func(context, context.req)
 	})
+
+	it("check_suite.completed completes PR with approvals and passing checks", async () => {
+		const context = NewContext(MockNotifications.check_suite.completed.sameRepo)
+
+		nock("https://api.github.com").get("/repos/AArnott/pr-autocomplete-scratch/pulls/2").reply(200, MockReplies.get.pr.open_automerge_clean)
+		nock("https://api.github.com")
+			.get("/repos/AArnott/pr-autocomplete-scratch/pulls/2/reviews")
+			.reply(200, MockReplies.get.pr.reviews.oneApproved)
+		nock("https://api.github.com").put("/repos/AArnott/pr-autocomplete-scratch/pulls/2/merge").reply(200)
+
+		await func(context, context.req)
+	})
+
+	it("check_suite.completed does not complete PR when changes_requested", async () => {
+		const context = NewContext(MockNotifications.check_suite.completed.sameRepo)
+
+		nock("https://api.github.com").get("/repos/AArnott/pr-autocomplete-scratch/pulls/2").reply(200, MockReplies.get.pr.open_automerge_clean)
+		nock("https://api.github.com")
+			.get("/repos/AArnott/pr-autocomplete-scratch/pulls/2/reviews")
+			.reply(200, MockReplies.get.pr.reviews.oneApproved_oneChanges)
+
+		await func(context, context.req)
+	})
 })

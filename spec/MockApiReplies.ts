@@ -13,8 +13,13 @@ export const MockReplies = {
 		},
 		pr: {
 			completed: ParseMockMessage("api.get.pr.completed.json"),
-			open_automerge: ParseMockMessage("api.get.pr.open_automerge.json"),
+			open_automerge_clean: ParseMockMessage("api.get.pr.open_automerge_clean.json"),
+			open_automerge_unstable: ParseMockMessage("api.get.pr.open_automerge_unstable.json"),
 			open_nolabels: ParseMockMessage("api.get.pr.open_nolabels.json"),
+			reviews: {
+				oneApproved: ParseMockMessage("api.get.pr.reviews.oneApproved.json"),
+				oneApproved_oneChanges: ParseMockMessage("api.get.pr.reviews.oneApproved_oneChanges.json"),
+			},
 		},
 	},
 }

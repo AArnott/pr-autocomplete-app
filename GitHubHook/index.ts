@@ -21,8 +21,8 @@ let eventCounter = 0
 
 // eslint-disable-next-line func-style
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-	context.log(`Event type: ${req.headers["x-github-event"]}`)
-	context.log(`Event ID: ${req.headers["x-github-delivery"]}`)
+	context.log.info(`Event type: ${req.headers["x-github-event"]}`)
+	context.log.info(`Event ID: ${req.headers["x-github-delivery"]}`)
 
 	const webhooks = new Webhooks({
 		secret: Inputs.GitHubWebhookSecret,
@@ -38,7 +38,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 				throw new Error("No request data.")
 			}
 
-			context.log(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
+			context.log.info(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
 			if (evt.payload.action === "closed") {
 				return
 			}
@@ -54,7 +54,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
 			await processPullRequest(pullRequest, context)
 		} catch (err) {
-			context.log(err)
+			context.log.error(err)
 			throw err
 		}
 	})
@@ -65,7 +65,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 				throw new Error("No request data.")
 			}
 
-			context.log(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
+			context.log.info(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
 
 			if (evt.payload.pull_request.state === "closed") {
 				return
@@ -76,7 +76,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
 			await processPullRequest(pullRequest, context)
 		} catch (err) {
-			context.log(err)
+			context.log.error(err)
 			throw err
 		}
 	})
@@ -91,7 +91,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 				throw new Error("No installation property in payload.")
 			}
 
-			context.log(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
+			context.log.info(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
 			const octokit = getOctokit(evt.payload.installation.id)
 
 			for (const pr of evt.payload.check_suite.pull_requests) {
@@ -99,7 +99,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 				await processPullRequest(pullRequest, context)
 			}
 		} catch (err) {
-			context.log(err)
+			context.log.error(err)
 			throw err
 		}
 	})
@@ -133,7 +133,7 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
 	if (autoCompleteMethod) {
 		const mergeable_state = await pullRequest.mergeable_state()
 		if (!constants.ready_states.includes(mergeable_state)) {
-			context.log(`Not completing PR because mergeable_state is ${mergeable_state}`)
+			context.log.info(`Not completing PR because mergeable_state is ${mergeable_state}`)
 			return
 		}
 
@@ -143,7 +143,7 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
 
 		// Never complete a PR when *anyone* has requested changes (regardless of push permissions or branch protections).
 		const reviews = await pullRequest.getReviews()
-		context.log(`Reviews: ${JSON.stringify(reviews)}`)
+		context.log.verbose(`Reviews: ${JSON.stringify(reviews)}`)
 		const lastReviewVote = new Map<string, string>()
 		for (const review of reviews) {
 			// Don't consider comment-only to be a vote one way or another,
@@ -153,20 +153,19 @@ async function processPullRequest(pullRequest: PullRequest, context: Context): P
 			}
 		}
 
-		for (const voter in lastReviewVote) {
-			if (Object.prototype.hasOwnProperty.call(lastReviewVote, voter)) {
-				const vote: string = lastReviewVote.get(voter)!
-				if (vote === constants.request_changes) {
-					context.log(`Changes requested by ${voter}. Not merging.`)
-					return
-				}
+		for (const entry of lastReviewVote) {
+			const voter = entry[0]
+			const vote = entry[1]
+			if (vote === constants.request_changes) {
+				context.log.info(`Changes requested by ${voter}. Not merging.`)
+				return
 			}
 		}
 
 		// Merge the current pull request
-		context.log("Attempting to merge...")
+		context.log.info("Attempting to merge...")
 		const mergeSucceeded = await pullRequest.merge(autoCompleteMethod)
-		context.log(`Merge result: ${mergeSucceeded ? "succeeded" : "failed"}`)
+		context.log.info(`Merge result: ${mergeSucceeded ? "succeeded" : "failed"}`)
 	}
 }
 
@@ -185,14 +184,14 @@ async function isInvalidatingUser(pullRequest: PullRequest, octokit: Octokit, co
 
 	// if the user does not have write access we must remove the label
 	if (!constants.required_permissions.includes(userPermission)) {
-		context.log(`User ${username} does not have permission. Permission: ${userPermission}`)
+		context.log.info(`User ${username} does not have permission. Permission: ${userPermission}`)
 
 		const labels = await pullRequest.labels()
 		const filteredLabels = labels.filter(label => constants.labelMap.has(label.name))
 		for (const label of filteredLabels) {
-			context.log(`Removing ${label.name} label`)
+			context.log.info(`Removing ${label.name} label`)
 			await pullRequest.removeLabel(label.name)
-			context.log(`Remove ${label.name} label`)
+			context.log.info(`Remove ${label.name} label`)
 		}
 		return true // invalid user
 	}
