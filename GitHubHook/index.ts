@@ -1,20 +1,9 @@
 import { PullRequest, MergeMethods } from "./pr_helper"
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 import { Octokit } from "@octokit/rest"
-import { createAppAuth } from "@octokit/auth-app"
 import { Webhooks } from "@octokit/webhooks"
 import Inputs from "./inputs"
-
-function getOctokit(installationId?: number): Octokit {
-	return new Octokit({
-		auth: {
-			id: Inputs.GitHubAppId,
-			privateKey: Inputs.GitHubAppPrivateKey.split("\\n").join("\n"), // we use "\n" literals as placeholders for line endings in the Azure Properties
-			installationId,
-		},
-		authStrategy: createAppAuth,
-	})
-}
+import { getOctokit } from "./OctokitAuth"
 
 const constants = {
 	labelMap: new Map([

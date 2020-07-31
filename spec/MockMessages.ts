@@ -15,6 +15,9 @@ function ParseMockMessage(name: string): IMockMessage {
 }
 
 export const MockMessages = {
+	pull_request_review: {
+		submitted: ParseMockMessage("pull_request_review.submitted.json"),
+	},
 	pull_request: {
 		closed: ParseMockMessage("pull_request.closed.json"),
 	},

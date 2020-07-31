@@ -1,17 +1,26 @@
 import func from "../GitHubHook/index"
-import { Context } from "@azure/functions"
+import { authInputs } from "../GitHubHook/OctokitAuth"
 import { MockMessages } from "./MockMessages"
+import { MockReplies } from "./MockApiReplies"
 import { NewContext } from "./MockAzureContext"
+import nock from "nock"
 
 describe("Azure Function", () => {
 	it("rejects bad signature", async () => {
-		const context: Context = NewContext({ eventType: "pull_request", payload: {} })
+		const context = NewContext({ eventType: "pull_request", payload: {} })
 		context.req!.headers["x-hub-signature"] = "bad sig"
 		await expect(func(context, context.req)).rejects.toThrowError("signature does not match event payload and secret")
 	})
 
 	it("does nothing with pull_request.closed", async () => {
-		const context: Context = NewContext(MockMessages.pull_request.closed)
+		const context = NewContext(MockMessages.pull_request.closed)
+		await func(context, context.req)
+	})
+
+	it("does nothing when review is submitted for completed PR", async () => {
+		nock("https://api.github.com").get("/repos/AArnott/pr-autocomplete-scratch/pulls/16").reply(200, MockReplies.get.pr.completed)
+		const context = NewContext(MockMessages.pull_request_review.submitted)
+		authInputs.auth = "mock-token"
 		await func(context, context.req)
 	})
 })
