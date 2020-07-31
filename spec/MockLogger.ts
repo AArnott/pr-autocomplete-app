@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 
 function MockLogger(...args: any[]): void {
@@ -13,11 +14,11 @@ MockLogger.warn = function warn(...args: any[]): void {
 }
 
 MockLogger.info = function info(...args: any[]): void {
-	console.info(...args)
+	// console.info(...args)
 }
 
 MockLogger.verbose = function verbose(...args: any[]): void {
-	console.info(...args)
+	// console.info(...args)
 }
 
 export default MockLogger

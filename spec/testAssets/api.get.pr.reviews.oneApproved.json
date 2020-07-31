@@ -1,0 +1,41 @@
+[
+	{
+			"id": 459331341,
+			"node_id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NDU5MzMxMzQx",
+			"user": {
+					"login": "brunolins16",
+					"id": 12376385,
+					"node_id": "MDQ6VXNlcjEyMzc2Mzg1",
+					"avatar_url": "https://avatars3.githubusercontent.com/u/12376385?v=4",
+					"gravatar_id": "",
+					"url": "https://api.github.com/users/brunolins16",
+					"html_url": "https://github.com/brunolins16",
+					"followers_url": "https://api.github.com/users/brunolins16/followers",
+					"following_url": "https://api.github.com/users/brunolins16/following{/other_user}",
+					"gists_url": "https://api.github.com/users/brunolins16/gists{/gist_id}",
+					"starred_url": "https://api.github.com/users/brunolins16/starred{/owner}{/repo}",
+					"subscriptions_url": "https://api.github.com/users/brunolins16/subscriptions",
+					"organizations_url": "https://api.github.com/users/brunolins16/orgs",
+					"repos_url": "https://api.github.com/users/brunolins16/repos",
+					"events_url": "https://api.github.com/users/brunolins16/events{/privacy}",
+					"received_events_url": "https://api.github.com/users/brunolins16/received_events",
+					"type": "User",
+					"site_admin": false
+			},
+			"body": "",
+			"state": "APPROVED",
+			"html_url": "https://github.com/AArnott/pr-autocomplete-scratch/pull/2#pullrequestreview-459331341",
+			"pull_request_url": "https://api.github.com/repos/AArnott/pr-autocomplete-scratch/pulls/2",
+			"author_association": "COLLABORATOR",
+			"_links": {
+					"html": {
+							"href": "https://github.com/AArnott/pr-autocomplete-scratch/pull/2#pullrequestreview-459331341"
+					},
+					"pull_request": {
+							"href": "https://api.github.com/repos/AArnott/pr-autocomplete-scratch/pulls/2"
+					}
+			},
+			"submitted_at": "2020-07-31T17:12:31Z",
+			"commit_id": "2b178a869beec1c09f03088b71cf20642c1ffd2a"
+	}
+]
