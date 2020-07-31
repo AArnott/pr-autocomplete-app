@@ -1,0 +1,83 @@
+{
+  "action": "added",
+  "installation": {
+    "id": 10947850,
+    "account": {
+      "login": "AArnott",
+      "id": 3548,
+      "node_id": "MDQ6VXNlcjM1NDg=",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/3548?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/AArnott",
+      "html_url": "https://github.com/AArnott",
+      "followers_url": "https://api.github.com/users/AArnott/followers",
+      "following_url": "https://api.github.com/users/AArnott/following{/other_user}",
+      "gists_url": "https://api.github.com/users/AArnott/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/AArnott/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/AArnott/subscriptions",
+      "organizations_url": "https://api.github.com/users/AArnott/orgs",
+      "repos_url": "https://api.github.com/users/AArnott/repos",
+      "events_url": "https://api.github.com/users/AArnott/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/AArnott/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "repository_selection": "selected",
+    "access_tokens_url": "https://api.github.com/app/installations/10947850/access_tokens",
+    "repositories_url": "https://api.github.com/installation/repositories",
+    "html_url": "https://github.com/settings/installations/10947850",
+    "app_id": 74711,
+    "app_slug": "pr-autocomplete",
+    "target_id": 3548,
+    "target_type": "User",
+    "permissions": {
+      "checks": "read",
+      "contents": "write",
+      "metadata": "read",
+      "pull_requests": "write"
+    },
+    "events": [
+      "check_run",
+      "check_suite",
+      "pull_request",
+      "pull_request_review"
+    ],
+    "created_at": "2020-07-30T15:28:15.000-06:00",
+    "updated_at": "2020-07-30T15:28:15.000-06:00",
+    "single_file_name": null
+  },
+  "repository_selection": "selected",
+  "repositories_added": [
+    {
+      "id": 283318210,
+      "node_id": "MDEwOlJlcG9zaXRvcnkyODMzMTgyMTA=",
+      "name": "pr-autocomplete-app",
+      "full_name": "AArnott/pr-autocomplete-app",
+      "private": true
+    }
+  ],
+  "repositories_removed": [
+
+  ],
+  "requester": null,
+  "sender": {
+    "login": "AArnott",
+    "id": 3548,
+    "node_id": "MDQ6VXNlcjM1NDg=",
+    "avatar_url": "https://avatars2.githubusercontent.com/u/3548?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/AArnott",
+    "html_url": "https://github.com/AArnott",
+    "followers_url": "https://api.github.com/users/AArnott/followers",
+    "following_url": "https://api.github.com/users/AArnott/following{/other_user}",
+    "gists_url": "https://api.github.com/users/AArnott/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/AArnott/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/AArnott/subscriptions",
+    "organizations_url": "https://api.github.com/users/AArnott/orgs",
+    "repos_url": "https://api.github.com/users/AArnott/repos",
+    "events_url": "https://api.github.com/users/AArnott/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/AArnott/received_events",
+    "type": "User",
+    "site_admin": false
+  }
+}
