@@ -222,15 +222,19 @@ async function installRepo(context: Context, installation: { id: number }, repos
 	for (const repo of repos) {
 		for (const label of constants.labelMap) {
 			try {
+				context.log.info(`Creating label: ${label[0]}`)
 				await octokit.issues.createLabel({
 					owner: repo.full_name.split("/")[0],
 					repo: repo.name,
 					name: label[0],
+					description: "Leads to a pull request to automatically complete when the necessary approvals are obtained and checks succeed.",
 					color: "0e8a16", // this is a green color
 				})
+				context.log.info(`Created label: ${label[0]}`)
 			} catch (err) {
 				if (err.status === 422 && err.errors.length === 1 && err.errors[0].code === "already_exists") {
 					// The label already exists. No problem.
+					context.log.info(`Label ${label[0]} already existed.`)
 				} else {
 					context.log.error(`Failed to create label: ${err.message}`)
 				}
