@@ -40,6 +40,63 @@ describe("Web hook", () => {
 		await func(context, context.req)
 	})
 
+	it("pull_request.labeled on clean PR merges", async () => {
+		const context = NewContext(MockNotifications.pull_request.labeled)
+
+		nock("https://api.github.com")
+			.get("/repos/AArnott/pr-autocomplete-scratch/pulls/22/reviews")
+			.reply(200, MockReplies.get.pr.reviews.oneApproved)
+		nock("https://api.github.com")
+			.put("/repos/AArnott/pr-autocomplete-scratch/pulls/22/merge", body => body.merge_method === "merge")
+			.reply(200)
+
+		await func(context, context.req)
+	})
+
+	it("pull_request.labeled on clean PR rebases", async () => {
+		const event = MockNotifications.pull_request.labeled
+		const payload: any = event.payload
+		payload.label.name = "auto-rebase"
+		payload.pull_request.labels[0].name = "auto-rebase"
+
+		const context = NewContext(event)
+
+		nock("https://api.github.com")
+			.get("/repos/AArnott/pr-autocomplete-scratch/pulls/22/reviews")
+			.reply(200, MockReplies.get.pr.reviews.oneApproved)
+		nock("https://api.github.com")
+			.put("/repos/AArnott/pr-autocomplete-scratch/pulls/22/merge", body => body.merge_method === "rebase")
+			.reply(200)
+
+		await func(context, context.req)
+	})
+
+	it("pull_request.labeled on clean PR squashes", async () => {
+		const event = MockNotifications.pull_request.labeled
+		const payload: any = event.payload
+		payload.label.name = "auto-squash"
+		payload.pull_request.labels[0].name = "auto-squash"
+
+		const context = NewContext(event)
+
+		nock("https://api.github.com")
+			.get("/repos/AArnott/pr-autocomplete-scratch/pulls/22/reviews")
+			.reply(200, MockReplies.get.pr.reviews.oneApproved)
+		nock("https://api.github.com")
+			.put("/repos/AArnott/pr-autocomplete-scratch/pulls/22/merge", body => body.merge_method === "squash")
+			.reply(200)
+
+		await func(context, context.req)
+	})
+
+	it("pull_request.labeled on conflicted PR does nothing", async () => {
+		const event = MockNotifications.pull_request.labeled
+		const payload: any = event.payload
+		payload.pull_request.mergeable = false
+		const context = NewContext(event)
+		await func(context, context.req)
+	})
+
 	it("pull_request.synchronize from admin does not remove label", async () => {
 		const context = NewContext(MockNotifications.pull_request.synchronize)
 
