@@ -1,2 +1,2 @@
 [config]
-command = yarn && yarn run build
+command = npm i yarn && node_modules\.bin\yarn && node_modules\.bin\yarn run build
