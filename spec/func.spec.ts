@@ -25,6 +25,23 @@ describe("Web hook", () => {
 		await expect(func(context, context.req)).rejects.toThrowError("signature does not match event payload and secret")
 	})
 
+	it("installation_repositories.added adds all labels", async () => {
+		const context = NewContext(MockNotifications.installation_repositories.added)
+
+		const labels = ["auto-merge", "auto-squash", "auto-rebase"]
+		const labelAlreadyExistsError = { message: "Validation Failed", errors: [{ resource: "Label", code: "already_exists", field: "name" }] }
+
+		let labelsAdded = 0
+		for (const label of labels) {
+			const localLabel = label
+			nock("https://api.github.com")
+				.post("/repos/AArnott/pr-autocomplete-scratch/labels", body => body.name === localLabel && body.color === "0e8a16")
+				.reply(() => [labelsAdded++ === 1 ? 422 : 201, labelAlreadyExistsError]) // for the second label simulate that it already existed
+		}
+
+		await func(context, context.req)
+	})
+
 	it("pull_request.closed does nothing", async () => {
 		const context = NewContext(MockNotifications.pull_request.closed)
 		await func(context, context.req)
