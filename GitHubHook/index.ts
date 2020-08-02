@@ -61,7 +61,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 				return
 			}
 
-			const octokit = getOctokit((evt.payload as any).installation.id)
+			const octokit = await getOctokit((evt.payload as any).installation.id)
 			const pullRequest = new PullRequest(context, evt.payload.pull_request.number, evt.payload, octokit)
 
 			if (evt.payload.action === "synchronize") {
@@ -89,7 +89,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 				return
 			}
 
-			const octokit = getOctokit((evt.payload as any).installation.id)
+			const octokit = await getOctokit((evt.payload as any).installation.id)
 			const pullRequest = new PullRequest(context, evt.payload.pull_request.number, evt.payload, octokit)
 
 			await processPullRequest(pullRequest, context)
@@ -110,7 +110,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 			}
 
 			context.log.info(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
-			const octokit = getOctokit(evt.payload.installation.id)
+			const octokit = await getOctokit(evt.payload.installation.id)
 
 			for (const pr of evt.payload.check_suite.pull_requests) {
 				const pullRequest = new PullRequest(context, pr.number, evt.payload, octokit)
@@ -218,7 +218,8 @@ async function isInvalidatingUser(pullRequest: PullRequest, octokit: Octokit, co
 }
 
 async function installRepo(context: Context, installation: { id: number }, repos: { full_name: string; name: string }[]): Promise<void> {
-	const octokit = getOctokit(installation.id)
+	const octokit = await getOctokit(installation.id)
+
 	for (const repo of repos) {
 		for (const label of constants.labelMap) {
 			try {

@@ -4,15 +4,17 @@ import { createAppAuth } from "@octokit/auth-app"
 
 export const authInputs: { auth?: string } = {}
 
-export function getOctokit(installationId?: number): Octokit {
-	const auth = authInputs ?? {
-		auth: {
-			id: Inputs.GitHubAppId,
-			privateKey: Inputs.GitHubAppPrivateKey.split("\\n").join("\n"), // we use "\n" literals as placeholders for line endings in the Azure Properties
-			installationId,
-		},
-		authStrategy: createAppAuth,
+export async function getOctokit(installationId?: number): Promise<Octokit> {
+	if (authInputs.auth) {
+		return new Octokit(authInputs)
 	}
 
-	return new Octokit(auth)
+	const auth = createAppAuth({
+		id: Inputs.GitHubAppId,
+		privateKey: Inputs.GitHubAppPrivateKey,
+	})
+
+	const authentication = await auth({ type: "installation", installationId })
+	const octokit = new Octokit({ auth: authentication.token })
+	return octokit
 }
