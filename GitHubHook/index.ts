@@ -227,7 +227,7 @@ async function installRepo(context: Context, installation: { id: number }, repos
 					owner: repo.full_name.split("/")[0],
 					repo: repo.name,
 					name: label[0],
-					description: "Leads to a pull request to automatically complete when the necessary approvals are obtained and checks succeed.",
+					description: "Auto-completes a PR when reviews and checks pass",
 					color: "0e8a16", // this is a green color
 				})
 				context.log.info(`Created label: ${label[0]}`)
