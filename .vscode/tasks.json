@@ -23,7 +23,7 @@
 		{
 			"type": "shell",
 			"label": "yarn prune",
-			"command": "yarn prune --production",
+			"command": "yarn install --production",
 			"dependsOn": "yarn build",
 			"problemMatcher": []
 		},
