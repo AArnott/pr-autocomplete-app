@@ -1,0 +1,20 @@
+{
+	"name": "PR Autocomplete",
+	"url": "https://github.com/apps/pr-autocomplete",
+	"hook_attributes": {
+		"url": "https://githubprautocomplete.azurewebsites.net/api/GitHubHook"
+	},
+	"redirect_url": "",
+	"description": "This auto-completes pull requests that are labeled `auto-merge`, `auto-squash` or `auto-rebase` when all checks pass and no reviewers have requested changes.",
+	"public": true,
+	"default_permissions": {
+		"checks": "read",
+		"contents": "write",
+		"pull requests": "write"
+	},
+	"default_events": [
+		"check_suite",
+		"pull_request",
+		"pull_request_review"
+	]
+}
