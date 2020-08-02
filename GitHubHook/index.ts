@@ -32,6 +32,24 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 		throw new Error("No request data.")
 	}
 
+	webhooks.on("installation.created", async evt => {
+		try {
+			await installRepo(context, evt.payload.installation, evt.payload.repositories)
+		} catch (err) {
+			context.log.error(err)
+			throw err
+		}
+	})
+
+	webhooks.on("installation_repositories.added", async evt => {
+		try {
+			await installRepo(context, evt.payload.installation, evt.payload.repositories_added)
+		} catch (err) {
+			context.log.error(err)
+			throw err
+		}
+	})
+
 	webhooks.on("pull_request", async evt => {
 		try {
 			if (!context.req) {
@@ -43,7 +61,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 				return
 			}
 
-			const octokit = getOctokit((evt.payload as any).installation.id)
+			const octokit = await getOctokit((evt.payload as any).installation.id)
 			const pullRequest = new PullRequest(context, evt.payload.pull_request.number, evt.payload, octokit)
 
 			if (evt.payload.action === "synchronize") {
@@ -71,7 +89,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 				return
 			}
 
-			const octokit = getOctokit((evt.payload as any).installation.id)
+			const octokit = await getOctokit((evt.payload as any).installation.id)
 			const pullRequest = new PullRequest(context, evt.payload.pull_request.number, evt.payload, octokit)
 
 			await processPullRequest(pullRequest, context)
@@ -92,7 +110,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 			}
 
 			context.log.info(`${context.req.headers["x-github-event"]}.${evt.payload.action}: ${++eventCounter}`)
-			const octokit = getOctokit(evt.payload.installation.id)
+			const octokit = await getOctokit(evt.payload.installation.id)
 
 			for (const pr of evt.payload.check_suite.pull_requests) {
 				const pullRequest = new PullRequest(context, pr.number, evt.payload, octokit)
@@ -197,6 +215,33 @@ async function isInvalidatingUser(pullRequest: PullRequest, octokit: Octokit, co
 	}
 
 	return false
+}
+
+async function installRepo(context: Context, installation: { id: number }, repos: { full_name: string; name: string }[]): Promise<void> {
+	const octokit = await getOctokit(installation.id)
+
+	for (const repo of repos) {
+		for (const label of constants.labelMap) {
+			try {
+				context.log.info(`Creating label: ${label[0]}`)
+				await octokit.issues.createLabel({
+					owner: repo.full_name.split("/")[0],
+					repo: repo.name,
+					name: label[0],
+					description: "Auto-completes a PR when reviews and checks pass",
+					color: "0e8a16", // this is a green color
+				})
+				context.log.info(`Created label: ${label[0]}`)
+			} catch (err) {
+				if (err.status === 422 && err.errors.length === 1 && err.errors[0].code === "already_exists") {
+					// The label already exists. No problem.
+					context.log.info(`Label ${label[0]} already existed.`)
+				} else {
+					context.log.error(`Failed to create label: ${err.message}`)
+				}
+			}
+		}
+	}
 }
 
 export default httpTrigger

@@ -1,9 +1,10 @@
 export default {
-	get GitHubAppId(): string {
-		return GetDefinedEnvVar("GitHubAppId")
+	get GitHubAppId(): number {
+		return Number.parseInt(GetDefinedEnvVar("GitHubAppId"))
 	},
 	get GitHubAppPrivateKey(): string {
-		return GetDefinedEnvVar("GitHubAppPrivateKey")
+		// We use "\n" literals as placeholders for line endings in the Azure Properties.
+		return GetDefinedEnvVar("GitHubAppPrivateKey").split("\\n").join("\n")
 	},
 	get GitHubWebhookSecret(): string {
 		return GetDefinedEnvVar("GitHubWebhookSecret")

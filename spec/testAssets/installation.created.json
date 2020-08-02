@@ -1,7 +1,7 @@
 {
-  "action": "added",
+  "action": "created",
   "installation": {
-    "id": 10947850,
+    "id": 10991411,
     "account": {
       "login": "AArnott",
       "id": 3548,
@@ -23,11 +23,11 @@
       "site_admin": false
     },
     "repository_selection": "selected",
-    "access_tokens_url": "https://api.github.com/app/installations/10947850/access_tokens",
+    "access_tokens_url": "https://api.github.com/app/installations/10991411/access_tokens",
     "repositories_url": "https://api.github.com/installation/repositories",
-    "html_url": "https://github.com/settings/installations/10947850",
-    "app_id": 74711,
-    "app_slug": "pr-autocomplete",
+    "html_url": "https://github.com/settings/installations/10991411",
+    "app_id": 75265,
+    "app_slug": "pr-autocomplete-staging",
     "target_id": 3548,
     "target_type": "User",
     "permissions": {
@@ -37,27 +37,22 @@
       "pull_requests": "write"
     },
     "events": [
-      "check_run",
       "check_suite",
       "pull_request",
       "pull_request_review"
     ],
-    "created_at": "2020-07-30T15:28:15.000-06:00",
-    "updated_at": "2020-07-30T15:28:15.000-06:00",
+    "created_at": "2020-08-01T10:46:10.000-06:00",
+    "updated_at": "2020-08-01T10:46:10.000-06:00",
     "single_file_name": null
   },
-  "repository_selection": "selected",
-  "repositories_added": [
+  "repositories": [
     {
-      "id": 283318210,
-      "node_id": "MDEwOlJlcG9zaXRvcnkyODMzMTgyMTA=",
+      "id": 283012516,
+      "node_id": "MDEwOlJlcG9zaXRvcnkyODMwMTI1MTY=",
       "name": "pr-autocomplete-scratch",
       "full_name": "AArnott/pr-autocomplete-scratch",
-      "private": true
+      "private": false
     }
-  ],
-  "repositories_removed": [
-
   ],
   "requester": null,
   "sender": {

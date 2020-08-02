@@ -27,6 +27,9 @@ export const MockNotifications = {
 			sameRepo: ParseMockMessage("check_suite.completed.json"),
 		},
 	},
+	installation: {
+		created: ParseMockMessage("installation.created.json"),
+	},
 	installation_repositories: {
 		added: ParseMockMessage("installation_repositories.added.json"),
 	},
