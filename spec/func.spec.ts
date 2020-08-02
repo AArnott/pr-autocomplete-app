@@ -10,12 +10,17 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-	nock.cleanAll()
+	nock.disableNetConnect()
 })
 
 afterEach(() => {
-	expect(nock.pendingMocks()).toEqual([])
-	expect(nock.isDone()).toBeTruthy()
+	try {
+		expect(nock.pendingMocks()).toEqual([])
+		expect(nock.isDone()).toBeTruthy()
+	} finally {
+		nock.cleanAll()
+		nock.enableNetConnect()
+	}
 })
 
 describe("Web hook", () => {
