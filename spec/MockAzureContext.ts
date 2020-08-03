@@ -1,7 +1,7 @@
 import { IMockMessage } from "./MockWebHookNotifications"
 import { HttpRequest, Context } from "@azure/functions"
 import MockLogger from "./MockLogger"
-import Webhooks from "@octokit/webhooks"
+import { Webhooks } from "@octokit/webhooks"
 import mockedEnv, { RestoreFn } from "mocked-env"
 
 const mockWebhookSecret = "some secret"
