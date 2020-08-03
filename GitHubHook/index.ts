@@ -1,7 +1,7 @@
 import { PullRequest, MergeMethods } from "./pr_helper"
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 import { Octokit } from "@octokit/rest"
-import { Webhooks } from "@octokit/webhooks"
+import { Webhooks, EventNames } from "@octokit/webhooks"
 import Inputs from "./inputs"
 import { getOctokit } from "./OctokitAuth"
 
@@ -124,7 +124,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
 	await webhooks.verifyAndReceive({
 		id: context.req.headers["x-github-delivery"],
-		name: context.req.headers["x-github-event"],
+		name: context.req.headers["x-github-event"] as EventNames.StringNames,
 		payload: context.req.body,
 		signature: context.req.headers["x-hub-signature"],
 	})

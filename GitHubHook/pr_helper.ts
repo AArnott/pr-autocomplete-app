@@ -1,12 +1,12 @@
 import { Octokit } from "@octokit/rest"
 import { PullsGetResponseData, PullsListReviewsResponseData } from "@octokit/types/dist-types"
-import { Webhooks } from "@octokit/webhooks"
+import { EventPayloads } from "@octokit/webhooks"
 import { Context } from "@azure/functions"
 
 type PRInfo = {
-	pull_request?: Webhooks.WebhookPayloadPullRequestPullRequest | Webhooks.WebhookPayloadPullRequestReviewPullRequest
-	repository: Webhooks.PayloadRepository
-	sender: Webhooks.WebhookPayloadPullRequestSender
+	pull_request?: EventPayloads.WebhookPayloadPullRequestPullRequest | EventPayloads.WebhookPayloadPullRequestReviewPullRequest
+	repository: EventPayloads.PayloadRepository
+	sender: EventPayloads.WebhookPayloadPullRequestSender
 }
 
 export enum MergeMethods {
@@ -24,7 +24,8 @@ export class PullRequest {
 
 	async isMergeable(): Promise<boolean> {
 		// Try to get the mergeable state from the push notification, if possible.
-		let mergeable: boolean | null | undefined = (this.pull_request.pull_request as Webhooks.WebhookPayloadPullRequestPullRequest)?.mergeable
+		const mergeablePullRequest = this.pull_request.pull_request as EventPayloads.WebhookPayloadPullRequestPullRequest
+		let mergeable: boolean | null | undefined = mergeablePullRequest?.mergeable
 		if (mergeable === undefined || mergeable === null) {
 			const data = await this.get()
 			mergeable = data.mergeable
@@ -34,7 +35,7 @@ export class PullRequest {
 	}
 
 	async mergeable_state(): Promise<string> {
-		let mergeable_state: string | undefined = (this.pull_request.pull_request as Webhooks.WebhookPayloadPullRequestPullRequest)
+		let mergeable_state: string | undefined = (this.pull_request.pull_request as EventPayloads.WebhookPayloadPullRequestPullRequest)
 			?.mergeable_state
 		if (mergeable_state === undefined || mergeable_state === null) {
 			const data = await this.get()
