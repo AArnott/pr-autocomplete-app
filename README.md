@@ -17,11 +17,11 @@ regarding the completion of pull requests.
 Pull requests may be auto-completed with a few merge methods.
 Each method has an associated label that you can use to schedule auto-completion with that method.
 
-Label | Merge method
+Label | Pull request completion method
 --|--
-`auto-merge` | Non-fast forward merge, which creates a new commit on the target branch with two parents, retaining the identity of all existing commits.
-`auto-squash` | Squash all commits from the source branch into a single, new commit with one parent on the target branch.
-`auto-rebase` | Rebase all commits from the source branch onto the target branch, retaining distinct commits but changing their commit ID.
+`auto-merge` | merge
+`auto-squash` | squash
+`auto-rebase` | rebase
 
 A pull request will be automatically completed when *all* these conditions are met:
 
