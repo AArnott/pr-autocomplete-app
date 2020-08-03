@@ -1,32 +1,49 @@
-# PR Auto-Merge App
+# Add auto-complete functionality to your GitHub pull requests
 
-### GitHub App to automatically merge pull requests when they are ready
+## Installation
 
-### Set-up and usage
-1. Install the [Github App](https://github.com/apps/pr-autocomplete) into your repository
-2. Add autocomplete label to any PR that should be autocompleted (`auto-merge` `auto-squash` `auto-rebase`)
-3. PR will be automatically merged once all conditions are met and merging is safe to do
+This auto-complete functionality can be installed to your entire GitHub account,
+a GitHub org, or a subset of repositories that you have push permission to.
 
-### Overview: Pull Request Validation
-A pull request is considered ready when:
-1. All build validations pass
-2. All repository-wide merge requirements have been accepted
-3. No code reviewers have "requested changes"
-4. The most recent change was executed by a contributor with ADMIN or WRITE (Collaborator) permissions
+**[Install the Github App](https://github.com/apps/pr-autocomplete)** and designate which account(s) and/or repo(s) should get the functionality.
 
-**Additional details & Security**
-- PR Auto-merge will follow repository-wide merge and build requirements (including required reviewers and failed tests)
-- Any requested/suggested changes from code reviewers will block automerge/autosquash, regardless of permissions
-- All autocomplete labels will be removed when any contributor without WRITE permissions performs any actions (including pushing changes to a repository)
-- If multiple autocomplete labels are included at once, no autocomplete will not be performed
+At installation, a few labels will be created in each repository so you can conveniently add them
+to your pull requests. These labels are described below.
+You may delete (and even later recreate) these labels as desired to suit the policies you follow
+regarding the completion of pull requests.
 
-### Configuration
+## Usage
 
-The following **autocomplete** options are supported:
-- `auto-merge`
-- `auto-squash`
-- `auto-rebase`
+Pull requests may be auto-completed with a few merge methods.
+Each method has an associated label that you can use to schedule auto-completion with that method.
 
-PR will be merged, squashed or rebased according to repository-wide settings
-- Branches will be automatically deleted only if setting is activated
+Label | Merge method
+--|--
+`auto-merge` | Non-fast forward merge, which creates a new commit on the target branch with two parents, retaining the identity of all existing commits.
+`auto-squash` | Squash all commits from the source branch into a single, new commit with one parent on the target branch.
+`auto-rebase` | Rebase all commits from the source branch onto the target branch, retaining distinct commits but changing their commit ID.
 
+A pull request will be automatically completed when *all* these conditions are met:
+
+1. Exactly *one* of these labels is applied to a pull request.
+1. No merge conflicts exist.
+1. All PR checks have passed.
+1. No code reviews that have requested changes remain.
+1. All branch protection policies (if any) are satisfied.
+
+### Head branch deletion
+
+This GitHub app does *not* explicitly delete the source branch of the pull request after completing it.
+If deleting the source branch after pull request completion is something you want, you can configure
+GitHub to do this for *all* pull requests (regardless of whether they were auto-completed) in
+the repository Settings page.
+
+## Security considerations
+
+After applying one of the auto-complete labels, if the pull request's source branch is updated
+by someone who lacks write permissions to the repo (e.g. a 3rd party sent the PR from a fork of your repo)
+the auto-complete label will be *automatically removed*.
+This protects your repo against unreviewed changes being merged into the repo between completion of a review
+and completion of the pull request.
+After the untrusted update and the label's removal, simply review the latest version of the PR and
+(if desired) reapply the auto-completion label.
