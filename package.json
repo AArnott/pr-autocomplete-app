@@ -19,7 +19,7 @@
 	"devDependencies": {
 		"@azure/functions": "^1.0.2-beta2",
 		"@types/jest": "^26.0.8",
-		"@typescript-eslint/parser": "^3.7.1",
+		"@typescript-eslint/parser": "^3.8.0",
 		"eslint": "^7.6.0",
 		"eslint-plugin-github": "^4.1.1",
 		"eslint-plugin-jest": "^23.20.0",
