@@ -61,7 +61,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 				return
 			}
 
-			const octokit = await getOctokit((evt.payload as any).installation.id)
+			const octokit = await getOctokit(evt.payload.installation.id)
 			const pullRequest = new PullRequest(context, evt.payload.pull_request.number, evt.payload, octokit)
 
 			if (evt.payload.action === "synchronize") {
@@ -89,7 +89,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 				return
 			}
 
-			const octokit = await getOctokit((evt.payload as any).installation.id)
+			const octokit = await getOctokit(evt.payload.installation.id)
 			const pullRequest = new PullRequest(context, evt.payload.pull_request.number, evt.payload, octokit)
 
 			await processPullRequest(pullRequest, context)
