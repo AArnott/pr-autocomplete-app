@@ -713,10 +713,10 @@
   dependencies:
     "@types/node" ">= 8"
 
-"@octokit/webhooks@^7.11.0":
-  version "7.11.0"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-7.11.0.tgz#167531c9adf6f10b62b04215c756f017bf78b830"
-  integrity sha512-ADKEcFYgPs1blBaW1MDvn+rJ/5qu8gpjrADf909Ew5prOgvsVFbuCfhLWZKJv21u4qWodJsy5K1zTufjnaAUNw==
+"@octokit/webhooks@^7.11.1":
+  version "7.11.1"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-7.11.1.tgz#06a25c16eddc4a33fc2a48319be327adb0d64593"
+  integrity sha512-jPQBKimrkbU0E5Wgv75sU5+De4eHaMCiqS2BNic4EzQqoSsM9jyjxgbBj5fYhpYRr8coimhA6w9BwTHOICKKNQ==
   dependencies:
     "@octokit/request-error" "^2.0.2"
     "@pika/plugin-ts-standard-pkg" "^0.9.2"
