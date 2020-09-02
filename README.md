@@ -4,6 +4,9 @@
 
 This auto-complete functionality can be installed to your entire GitHub account, a GitHub org, or a subset of repositories that you have push permission to.
 
+Please read our [privacy policy](doc/privacy_policy.md) and our [terms of use](doc/terms_of_use.md) before getting started.
+We wrote them ourselves, so they are short and easy reading. :)
+
 **[Install the Github App](https://github.com/apps/pr-autocomplete)** and designate which account(s) and/or repo(s) should get the functionality.
 
 At installation, a few labels will be created in each repository so you can conveniently add them to your pull requests. These labels are described below. You may delete (and even later recreate) these labels as desired to suit the policies you follow regarding the completion of pull requests.
