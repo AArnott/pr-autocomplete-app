@@ -12,7 +12,7 @@
 		"test": "jest"
 	},
 	"dependencies": {
-		"@octokit/auth-app": "^2.5.1",
+		"@octokit/auth-app": "^2.6.0",
 		"@octokit/rest": "^18.0.6",
 		"@octokit/webhooks": "^7.11.2"
 	},
