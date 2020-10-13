@@ -1,7 +1,7 @@
 import { PullRequest, MergeMethods } from "./pr_helper"
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 import { Octokit } from "@octokit/rest"
-import { Webhooks, EventNames } from "@octokit/webhooks"
+import { Webhooks, WebhookEvents } from "@octokit/webhooks"
 import Inputs from "./inputs"
 import { getOctokit } from "./OctokitAuth"
 
@@ -61,7 +61,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 				return
 			}
 
-			const octokit = await getOctokit(evt.payload.installation.id)
+			const octokit = await getOctokit(evt.payload.installation?.id)
 			const pullRequest = new PullRequest(context, evt.payload.pull_request.number, evt.payload, octokit)
 
 			if (evt.payload.action === "synchronize") {
@@ -89,7 +89,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 				return
 			}
 
-			const octokit = await getOctokit(evt.payload.installation.id)
+			const octokit = await getOctokit(evt.payload.installation?.id)
 			const pullRequest = new PullRequest(context, evt.payload.pull_request.number, evt.payload, octokit)
 
 			await processPullRequest(pullRequest, context)
@@ -124,7 +124,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
 	await webhooks.verifyAndReceive({
 		id: context.req.headers["x-github-delivery"],
-		name: context.req.headers["x-github-event"] as EventNames.StringNames,
+		name: context.req.headers["x-github-event"] as WebhookEvents,
 		payload: context.req.body,
 		signature: context.req.headers["x-hub-signature"],
 	})
