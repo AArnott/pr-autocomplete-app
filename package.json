@@ -13,7 +13,7 @@
 	},
 	"dependencies": {
 		"@octokit/auth-app": "^2.10.5",
-		"@octokit/rest": "^18.0.6",
+		"@octokit/rest": "^18.0.12",
 		"@octokit/webhooks": "^7.15.1"
 	},
 	"devDependencies": {
