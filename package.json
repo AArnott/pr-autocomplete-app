@@ -14,7 +14,7 @@
 	"dependencies": {
 		"@octokit/auth-app": "^2.10.5",
 		"@octokit/rest": "^18.0.6",
-		"@octokit/webhooks": "^7.15.1"
+		"@octokit/webhooks": "^7.21.0"
 	},
 	"devDependencies": {
 		"@azure/functions": "^1.2.2",
